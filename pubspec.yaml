@@ -1,0 +1,29 @@
+name: calderum
+description: A magical potion brewing board game app inspired by Pócimas y Brebajes.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.0.0
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  supabase_flutter: ^2.0.0
+  flutter_dotenv: ^5.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.6
+  freezed: ^2.5.1
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
