@@ -31,15 +31,3 @@
 flutter pub get
 flutter run
 ```
-
----
-
-## 🤝 Contributions
-
-Magical contributions are welcome! Open an issue, submit a PR, or simply star the repo if you like the project ✨
-
----
-
-## 🧙‍♂️ License
-
-This project is licensed under the MIT License.
