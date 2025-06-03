@@ -1,16 +1,45 @@
-# calderum
+# 🧪 Calderum
 
-A new Flutter project.
+**Calderum** is a Flutter application inspired by board game mechanics like *The Quacks of Quedlinburg*. It blends strategy, randomness, and a magical-minimalist visual environment. Designed for mobile devices, Calderum allows multiple players to manage their ingredients, progress through personal boards, and compete round by round to brew the best potion.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## ✨ Features
 
-A few resources to get you started if this is your first Flutter project:
+- 🎮 Local multiplayer game
+- 🧙 Magical UI with *Flat Magical* design
+- 🧪 Board logic with ingredient drawing and explosion mechanics
+- 🔮 Enchanted animations and visual effects
+- 📦 Clean architecture (MVVM + Riverpod)
+- ☁️ Supabase data storage
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠️ Technologies
+
+- Flutter + Dart
+- Riverpod (with code generation)
+- Supabase
+- GoRouter
+- Freezed
+
+---
+
+## 🚀 Getting Started
+
+```bash
+flutter pub get
+flutter run
+```
+
+---
+
+## 🤝 Contributions
+
+Magical contributions are welcome! Open an issue, submit a PR, or simply star the repo if you like the project ✨
+
+---
+
+## 🧙‍♂️ License
+
+This project is licensed under the MIT License.
