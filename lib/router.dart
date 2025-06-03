@@ -1,5 +1,5 @@
-import 'package:calderum/account/viewmodels/auth_viewmodel.dart';
-import 'package:calderum/account/views/login_view.dart';
+import 'package:calderum/features/account/viewmodels/auth_viewmodel.dart';
+import 'package:calderum/features/account/views/login_view.dart';
 import 'package:calderum/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

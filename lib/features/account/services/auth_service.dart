@@ -1,6 +1,7 @@
+import 'package:calderum/core/services/global_services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AuthService {
+class AuthService extends GlobalServices {
   final SupabaseClient _client = Supabase.instance.client;
 
   Future<AuthResponse> signInWithEmail(String email, String password) {
