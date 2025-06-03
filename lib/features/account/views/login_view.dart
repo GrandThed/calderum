@@ -1,20 +1,16 @@
-import 'package:calderum/core/widgets/elevated_button.dart';
-import 'package:calderum/core/widgets/text_form_field.dart';
+import 'package:calderum/core/widgets/calderum_button.dart';
+import 'package:calderum/features/account/views/signup_view.dart';
+import 'package:calderum/features/account/widgets/login_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../viewmodels/auth_viewmodel.dart';
+import 'package:go_router/go_router.dart';
 
-class LoginScreen extends ConsumerWidget {
-  const LoginScreen({super.key});
+class LoginView extends ConsumerWidget {
+  const LoginView({super.key});
+  static const routeName = '/login';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authViewModelProvider);
-    final authNotifier = ref.read(authViewModelProvider.notifier);
-
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -28,36 +24,22 @@ class LoginScreen extends ConsumerWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset('assets/images/login_logo.png'),
                 const SizedBox(height: 24),
-                CalderumTextField(controller: emailController, hint: 'Email'),
-                const SizedBox(height: 12),
-                CalderumTextField(
-                  controller: passwordController,
-                  hint: 'Password',
-                  obscureText: true,
-                ),
+                LoginForm(),
                 const SizedBox(height: 24),
-                CalderumButton(
-                  filled: true,
-                  label: 'Login',
-                  isLoading: authState.isLoading,
-                  onPressed: () async {
-                    await authNotifier.login(
-                      emailController.text,
-                      passwordController.text,
-                    );
-
-                    if (authState.hasError && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(authState.error.toString())),
-                      );
-                    }
-                  },
+                SizedBox(
+                  width: double.infinity,
+                  child: CalderumButton(
+                    filled: true,
+                    label: 'Sign Up',
+                    onPressed: () {
+                      context.push(SignUpView.routeName);
+                    },
+                  ),
                 ),
               ],
             ),

@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CalderumTextField extends StatelessWidget {
   final String hint;
   final TextEditingController? controller;
   final bool obscureText;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputType keyboardType;
 
   const CalderumTextField({
     super.key,
     required this.hint,
     this.controller,
     this.obscureText = false,
+    this.inputFormatters,
+    this.keyboardType = TextInputType.text,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      keyboardType: keyboardType,
+      autocorrect: false,
+      inputFormatters: inputFormatters,
       controller: controller,
       obscureText: obscureText,
       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
