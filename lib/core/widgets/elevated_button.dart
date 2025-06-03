@@ -4,12 +4,14 @@ class CalderumButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final bool filled;
+  final bool isLoading;
 
   const CalderumButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.filled = true,
+    this.isLoading = false,
   });
 
   @override
@@ -21,7 +23,7 @@ class CalderumButton extends StatelessWidget {
     final border = BorderSide(color: const Color(0xFFFFB347), width: 2);
 
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: textColor,
@@ -33,7 +35,9 @@ class CalderumButton extends StatelessWidget {
         ),
         textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
       ),
-      child: Text(label),
+      child: isLoading
+          ? CircularProgressIndicator(color: textColor)
+          : Text(label),
     );
   }
 }
