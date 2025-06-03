@@ -30,6 +30,7 @@ class MyApp extends ConsumerWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
+  static const routeName = '/home';
   final String title;
 
   @override

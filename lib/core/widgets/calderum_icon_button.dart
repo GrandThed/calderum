@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class CalderumButton extends StatelessWidget {
+class CalderumIconButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final bool filled;
   final IconData? icon;
 
-  const CalderumButton({
+  const CalderumIconButton({
     super.key,
     required this.label,
     required this.onPressed,

@@ -19,9 +19,15 @@ const CalderumTextTheme = TextTheme(
     color: Colors.white70,
   ),
   labelLarge: TextStyle(
-    fontFamily: 'Caveat',
+    fontFamily: 'Caudex',
     fontSize: 20,
     fontWeight: FontWeight.w600,
+    color: Color(0xFFFFB347),
+  ),
+  labelMedium: TextStyle(
+    fontFamily: 'Caveat',
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
     color: Color(0xFFFFB347),
   ),
 );

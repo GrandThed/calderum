@@ -1,3 +1,4 @@
+import 'package:calderum/core/widgets/app_loader.dart';
 import 'package:flutter/material.dart';
 
 class CalderumButton extends StatelessWidget {
@@ -33,11 +34,13 @@ class CalderumButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           side: filled ? BorderSide.none : border,
         ),
-        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          fontFamily: 'Caudex',
+        ),
       ),
-      child: isLoading
-          ? CircularProgressIndicator(color: textColor)
-          : Text(label),
+      child: isLoading ? AppLoader(size: 26, strokeWidth: 4) : Text(label),
     );
   }
 }
