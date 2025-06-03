@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../services/supabase/auth_service.dart';
+import '../services/auth_service.dart';
 
 part 'auth_viewmodel.g.dart';
 
@@ -9,17 +9,18 @@ class AuthViewModel extends _$AuthViewModel {
   final _authService = AuthService();
 
   @override
-  bool build() => false; // isLoading
+  AsyncValue<void> build() {
+    return const AsyncData(null);
+  }
 
-  Future<String?> login(String email, String password) async {
-    state = true;
+  Future<void> login(String email, String password) async {
+    state = const AsyncLoading();
+
     try {
       await _authService.signInWithEmail(email, password);
-      return null;
-    } catch (e) {
-      return e.toString();
-    } finally {
-      state = false;
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
     }
   }
 
@@ -27,5 +28,6 @@ class AuthViewModel extends _$AuthViewModel {
     await _authService.signOut();
   }
 
+  Stream<void> get authStateChanges => _authService.authStateChanges;
   bool get isLoggedIn => _authService.currentUser != null;
 }
