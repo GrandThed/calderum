@@ -42,26 +42,23 @@ class LoginScreen extends ConsumerWidget {
                   obscureText: true,
                 ),
                 const SizedBox(height: 24),
-                authState.isLoading
-                    ? const CircularProgressIndicator()
-                    : CalderumButton(
-                        filled: true,
-                        label: 'Login',
-                        onPressed: () async {
-                          await authNotifier.login(
-                            emailController.text,
-                            passwordController.text,
-                          );
+                CalderumButton(
+                  filled: true,
+                  label: 'Login',
+                  isLoading: authState.isLoading,
+                  onPressed: () async {
+                    await authNotifier.login(
+                      emailController.text,
+                      passwordController.text,
+                    );
 
-                          if (authState.hasError && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(authState.error.toString()),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                    if (authState.hasError && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(authState.error.toString())),
+                      );
+                    }
+                  },
+                ),
               ],
             ),
           ),
