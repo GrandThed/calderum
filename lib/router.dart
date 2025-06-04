@@ -1,6 +1,8 @@
 import 'package:calderum/features/account/viewmodels/auth_viewmodel.dart';
 import 'package:calderum/features/account/views/login_view.dart';
 import 'package:calderum/features/account/views/signup_view.dart';
+import 'package:calderum/features/home/views/home_view.dart';
+import 'package:calderum/features/room/views/create_room_view.dart';
 import 'package:calderum/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,7 +21,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isLoggingIn =
           state.matchedLocation == LoginView.routeName ||
           state.matchedLocation == SignUpView.routeName;
-
       if (!loggedIn && !isLoggingIn) return LoginView.routeName;
       if (loggedIn && isLoggingIn) return MyHomePage.routeName;
       return null;
@@ -34,8 +35,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SignUpView(),
       ),
       GoRoute(
-        path: MyHomePage.routeName,
-        builder: (context, state) => const MyHomePage(title: "Calderum"),
+        path: CreateRoomScreen.routeName,
+        builder: (context, state) => const CreateRoomScreen(),
+      ),
+      GoRoute(
+        path: HomeView.routeName,
+        builder: (context, state) => const HomeView(),
       ),
     ],
   );
