@@ -7,7 +7,8 @@ class CalderumTextField extends StatelessWidget {
   final bool obscureText;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType keyboardType;
-
+  final TextInputAction textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
   const CalderumTextField({
     super.key,
     required this.hint,
@@ -15,11 +16,15 @@ class CalderumTextField extends StatelessWidget {
     this.obscureText = false,
     this.inputFormatters,
     this.keyboardType = TextInputType.text,
+    this.textInputAction = TextInputAction.done,
+    this.onFieldSubmitted,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onSubmitted: onFieldSubmitted,
+      textInputAction: textInputAction,
       keyboardType: keyboardType,
       autocorrect: false,
       inputFormatters: inputFormatters,
