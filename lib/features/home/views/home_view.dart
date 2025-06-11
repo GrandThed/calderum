@@ -1,5 +1,6 @@
 import 'package:calderum/core/services/global_services.dart';
 import 'package:calderum/core/widgets/calderum_app_bar.dart';
+import 'package:calderum/features/account/viewmodels/auth_viewmodel.dart';
 import 'package:calderum/features/room/services/room_services.dart';
 import 'package:calderum/features/room/viewmodels/room_viewmodel.dart';
 import 'package:calderum/features/room/views/create_room_view.dart';
@@ -57,6 +58,14 @@ class _HomeScreenState extends ConsumerState<HomeView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // logout
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                ref.read(authViewModelProvider.notifier).logout();
+                context.go('/');
+              },
+            ),
             Text(
               'Welcome, $email',
               style: Theme.of(context).textTheme.titleLarge,
