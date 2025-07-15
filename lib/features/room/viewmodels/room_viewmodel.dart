@@ -11,22 +11,16 @@ part 'room_viewmodel.g.dart';
 class RoomViewModel extends _$RoomViewModel {
   final _service = RoomService();
 
-  StreamSubscription<List<Room>>? _subscription;
-
   @override
-  AsyncValue<List<Room>> build() {
+  FutureOr<List<Room>> build() async {
+    state = const AsyncValue.loading();
     final userId = GlobalServices.currentUserId;
-    if (userId == null) return const AsyncValue.data([]);
-
-    _subscription = _service.streamUserRooms(userId).listen((rooms) {
-      state = AsyncValue.data(rooms);
-    });
-
-    ref.onDispose(() {
-      _subscription?.cancel();
-    });
-
-    return const AsyncValue.loading();
+    try {
+      final rooms = await _service.getRoomsForPlayer(userId!);
+      return rooms;
+    } catch (e, _) {
+      throw Exception('Failed to load rooms: $e');
+    }
   }
 
   Future<void> createRoom(Room room) async {
@@ -35,13 +29,6 @@ class RoomViewModel extends _$RoomViewModel {
 
   Future<void> joinRoom(String roomId, String playerId) async {
     await _service.joinRoom(roomId, playerId);
-  }
-
-  Room? getRoomById(String id) {
-    return state.maybeWhen(
-      data: (rooms) => rooms.firstWhere((r) => r.id == id),
-      orElse: () => null,
-    );
   }
 
   Future<Room?> getRoomByInviteCode(String inviteCode) async {

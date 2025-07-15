@@ -31,7 +31,6 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
           : nameController.text.trim(),
       hostId: userId,
       inviteCode: nanoid(8),
-      playerIds: [userId],
       status: RoomStatus.creating,
       round: roundCount,
       createdAt: DateTime.now(),

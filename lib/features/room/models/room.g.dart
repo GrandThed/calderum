@@ -11,9 +11,6 @@ _Room _$RoomFromJson(Map<String, dynamic> json) => _Room(
   name: json['name'] as String,
   hostId: json['hostId'] as String,
   inviteCode: json['inviteCode'] as String,
-  playerIds: (json['playerIds'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
   status: const RoomStatusConverter().fromJson(json['status'] as String),
   round: (json['round'] as num?)?.toInt() ?? 1,
   currentTurnPlayerId: json['currentTurnPlayerId'] as String?,
@@ -26,7 +23,6 @@ Map<String, dynamic> _$RoomToJson(_Room instance) => <String, dynamic>{
   'name': instance.name,
   'hostId': instance.hostId,
   'inviteCode': instance.inviteCode,
-  'playerIds': instance.playerIds,
   'status': const RoomStatusConverter().toJson(instance.status),
   'round': instance.round,
   'currentTurnPlayerId': instance.currentTurnPlayerId,

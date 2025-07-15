@@ -12,7 +12,6 @@ abstract class Room with _$Room {
     required String name,
     required String hostId,
     required String inviteCode,
-    required List<String> playerIds,
     @RoomStatusConverter() required RoomStatus status,
     @Default(1) int round,
     String? currentTurnPlayerId,
