@@ -1,4 +1,3 @@
-import 'package:calderum/core/services/global_services.dart';
 import 'package:calderum/features/room/models/room.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,27 +9,21 @@ class RoomList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentUserId = GlobalServices.currentUserId;
-
-    final invitedRooms = rooms.where((room) {
-      return room.playerIds.contains(currentUserId);
-    }).toList();
-
-    if (invitedRooms.isEmpty) {
+    if (rooms.isEmpty) {
       return const Center(child: Text('No rooms you\'re invited to yet'));
     }
 
     return ListView.separated(
-      itemCount: invitedRooms.length,
+      itemCount: rooms.length,
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (context, index) {
-        final room = invitedRooms[index];
+        final room = rooms[index];
 
         return ListTile(
           title: Text(room.name),
           subtitle: Row(
             children: [
-              Text('${room.playerIds.length}/${room.maxPlayers} players'),
+              // Text('${room.playerIds.length}/${room.maxPlayers} players'),
               const SizedBox(width: 12),
               _statusChip(room.status, context),
             ],
