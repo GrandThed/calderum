@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "549073578108",
+    "project_id": "calderum-e4703",
+    "storage_bucket": "calderum-e4703.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549073578108:android:cb7a2852b4954937ebc1f9",
+        "android_client_info": {
+          "package_name": "com.example.calderum"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzClWqlXtuC0bAVepDy5kBfNi1C23p3nA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
