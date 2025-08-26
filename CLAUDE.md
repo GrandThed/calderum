@@ -84,3 +84,32 @@ dart mcp-server
 2. Make code changes - MCP server will track them
 3. Use AI assistance for code generation, refactoring, and debugging
 4. MCP server stops automatically when development session ends
+
+## Firebase Security Setup 🔒
+The project implements secure Firebase credential management to protect sensitive API keys.
+
+### Security Implementation
+- **Environment Variables**: All Firebase credentials stored in `.env` file
+- **Version Control**: `.env` file excluded from Git via `.gitignore`
+- **Example Template**: `.env.example` shows required structure without sensitive values
+- **Secure Initialization**: `firebase_options_secure.dart` loads credentials from environment
+
+### Setup Instructions
+1. Copy `.env.example` to `.env`
+2. Fill in your actual Firebase credentials in `.env`
+3. Use `main_secure.dart` for secure Firebase initialization
+4. **NEVER** commit `.env` to version control
+
+### Security Best Practices
+- Regularly rotate Firebase API keys
+- Use Firebase Security Rules to restrict database access
+- Enable Firebase App Check for additional security
+- Monitor Firebase usage for suspicious activity
+- Never commit `.env` file to version control
+- Use different Firebase projects for development/staging/production
+
+### Files Overview
+- `.env` - Contains sensitive Firebase credentials (excluded from Git)
+- `.env.example` - Template showing required environment variables
+- `firebase_options_secure.dart` - Secure Firebase options using environment variables
+- `main.dart` - Entry point with secure Firebase initialization

@@ -43,3 +43,21 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Environment variables and sensitive configuration
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Firebase configuration files 
+# google-services.json
+# GoogleService-Info.plist
+
+# MCP Server
+mcp_server/
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.gr.dart
