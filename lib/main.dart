@@ -1,16 +1,32 @@
+import 'dart:async';
+
 import 'package:calderum/core/theme/calderum_theme.dart';
 import 'package:calderum/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mcp_toolkit/mcp_toolkit.dart';
 import 'features/account/services/supabase/supabase_client.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
-
-  await SupabaseClientService.initialize();
-  runApp(ProviderScope(child: MyApp()));
+Future<void> main() async {
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      
+      // Initialize MCP Toolkit
+      MCPToolkitBinding.instance
+        ..initialize()
+        ..initializeFlutterToolkit();
+      
+      await dotenv.load();
+      await SupabaseClientService.initialize();
+      
+      runApp(ProviderScope(child: MyApp()));
+    },
+    (error, stack) {
+      MCPToolkitBinding.instance.handleZoneError(error, stack);
+    },
+  );
 }
 
 class MyApp extends ConsumerWidget {

@@ -1,13 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../services/auth_service.dart';
+import '../repositories/auth_repository.dart';
 
 part 'auth_viewmodel.g.dart';
 
 @riverpod
 class AuthViewModel extends _$AuthViewModel {
-  final _authService = AuthService();
-
   @override
   AsyncValue<void> build() {
     return const AsyncData(null);
@@ -17,17 +15,24 @@ class AuthViewModel extends _$AuthViewModel {
     state = const AsyncLoading();
 
     try {
-      await _authService.signInWithEmail(email, password);
+      await ref.read(authRepositoryProvider.notifier).signIn(
+        email: email,
+        password: password,
+      );
       state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(e, st);
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
     }
   }
 
   Future<void> logout() async {
-    await _authService.signOut();
+    state = const AsyncLoading();
+    
+    try {
+      await ref.read(authRepositoryProvider.notifier).signOut();
+      state = const AsyncData(null);
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+    }
   }
-
-  Stream<void> get authStateChanges => _authService.authStateChanges;
-  bool get isLoggedIn => _authService.currentUser != null;
 }

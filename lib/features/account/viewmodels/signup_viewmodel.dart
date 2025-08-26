@@ -1,12 +1,11 @@
-import 'package:calderum/features/account/services/auth_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../repositories/auth_repository.dart';
 
 part 'signup_viewmodel.g.dart';
 
 @riverpod
 class SignUpViewModel extends _$SignUpViewModel {
-  final _authService = AuthService();
-
   @override
   AsyncValue<void> build() {
     return const AsyncData(null);
@@ -16,10 +15,13 @@ class SignUpViewModel extends _$SignUpViewModel {
     state = const AsyncLoading();
 
     try {
-      await _authService.signUpWithEmail(email, password);
+      await ref.read(authRepositoryProvider.notifier).signUp(
+        email: email,
+        password: password,
+      );
       state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(e, st);
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
     }
   }
 }

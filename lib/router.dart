@@ -1,8 +1,7 @@
-import 'package:calderum/features/account/viewmodels/auth_viewmodel.dart';
+import 'package:calderum/features/account/repositories/auth_repository.dart';
 import 'package:calderum/features/account/views/login_view.dart';
 import 'package:calderum/features/account/views/signup_view.dart';
 import 'package:calderum/features/home/views/home_view.dart';
-import 'package:calderum/features/room/views/create_room_view.dart';
 import 'package:calderum/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,18 +10,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
-  final auth = ref.watch(authViewModelProvider.notifier);
+  final isLoggedIn = ref.watch(isLoggedInProvider);
 
   return GoRouter(
     initialLocation: LoginView.routeName,
     refreshListenable: notifier,
     redirect: (context, state) {
-      final loggedIn = auth.isLoggedIn;
+      final loggedIn = isLoggedIn;
       final isLoggingIn =
           state.matchedLocation == LoginView.routeName ||
           state.matchedLocation == SignUpView.routeName;
       if (!loggedIn && !isLoggingIn) return LoginView.routeName;
-      if (loggedIn && isLoggingIn) return MyHomePage.routeName;
+      if (loggedIn && isLoggingIn) return HomeView.routeName;
       return null;
     },
     routes: [
@@ -33,10 +32,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: SignUpView.routeName,
         builder: (context, state) => const SignUpView(),
-      ),
-      GoRoute(
-        path: CreateRoomScreen.routeName,
-        builder: (context, state) => const CreateRoomScreen(),
       ),
       GoRoute(
         path: HomeView.routeName,
