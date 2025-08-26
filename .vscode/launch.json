@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Calderum Development",
+      "request": "launch",
+      "type": "dart",
+      "preLaunchTask": "Start MCP Server",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Calderum (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "preLaunchTask": "Start MCP Server",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Calderum (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "program": "lib/main.dart"
+    }
+  ]
+}
