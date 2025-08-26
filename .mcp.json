@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "dart-mcp": {
+      "command": "dart",
+      "args": ["mcp-server"],
+      "env": {
+        "DART_SDK": "C:\\tools\\dart-sdk",
+        "FLUTTER_SDK": "C:\\flutter_sdk\\flutter"
+      }
+    }
+  }
+}
