@@ -1,7 +1,7 @@
 # Calderum Project
 
 ## Project Overview
-A magical potion brewing board game app inspired by Pócimas y Brebajes, built with Flutter and Firebase.
+A magical potion brewing board game app inspired by The Quacks of Quedlinburg, built with Flutter and Firebase.
 
 ## Tech Stack
 - **Framework**: Flutter (Dart SDK 3.4.1)

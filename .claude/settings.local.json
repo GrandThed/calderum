@@ -96,12 +96,17 @@
       "Bash(export:*)",
       "Bash(echo $PATH)",
       "Bash(PATH=\"/c/flutter_sdk/flutter/bin:$PATH\")",
-      "Bash(dart:*)"
+      "Bash(dart:*)",
+      "mcp__dart-mcp__pub"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
       "C:"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "dart-mcp"
+  ]
 }
