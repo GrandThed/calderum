@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options_secure.dart';
+import 'router/app_router.dart';
+import 'shared/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,26 +24,22 @@ void main() async {
   );
 }
 
-class CalderumApp extends StatelessWidget {
+class CalderumApp extends ConsumerWidget {
   const CalderumApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    
+    return MaterialApp.router(
       title: 'Calderum',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        fontFamily: 'Caudex',
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'Calderum - Firebase Secured',
-            style: TextStyle(fontSize: 24),
-          ),
-        ),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.darkTheme,
+      routerConfig: router,
+      builder: (context, child) {
+        // Ensure text is always visible even if fonts haven't loaded
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }
