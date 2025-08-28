@@ -4,7 +4,7 @@
       "command": "dart",
       "args": ["mcp-server"],
       "env": {
-        "DART_SDK": "C:\\tools\\dart-sdk",
+        "DART_SDK": "C:\\flutter_sdk\\flutter\\bin\\cache\\dart-sdk",
         "FLUTTER_SDK": "C:\\flutter_sdk\\flutter"
       }
     }
