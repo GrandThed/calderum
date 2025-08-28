@@ -4,7 +4,7 @@
 A magical potion brewing board game app inspired by The Quacks of Quedlinburg, built with Flutter and Firebase.
 
 ## Tech Stack
-- **Framework**: Flutter (Dart SDK 3.4.1)
+- **Framework**: Flutter 3.35.2 (Dart SDK 3.9.0)
 - **State Management**: Riverpod (flutter_riverpod, riverpod_annotation)
 - **Routing**: go_router
 - **Backend**: Firebase (Auth, Firestore, Storage)
@@ -51,6 +51,8 @@ flutter analyze
 - Custom UI components with Caudex and Caveat fonts
 
 ## Environment Setup
+- **Flutter Version**: 3.35.2 (stable channel)
+- **Dart SDK**: 3.9.0
 - Requires Firebase configuration files (`google-services.json` for Android, `GoogleService-Info.plist` for iOS)
 - Uses flutter_dotenv for additional environment configuration
 

@@ -26,7 +26,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   Future<void> _signIn() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(authViewModelProvider.notifier).signIn(
+      await ref
+          .read(authViewModelProvider.notifier)
+          .signIn(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
@@ -83,10 +85,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
                         ),
                         const SizedBox(height: 32),
                         Text(
-                          '🧙‍♂️ Welcome to Calderum',
+                          '🧙‍♂️ Welcome to Calderum! 🔥',
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontFamily: 'Caudex',
                             fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -106,7 +109,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 label: 'Email',
                                 hint: 'Enter your email',
                                 keyboardType: TextInputType.emailAddress,
-                                autofillHints: const [AutofillHints.email, AutofillHints.username],
+                                autofillHints: const [
+                                  AutofillHints.email,
+                                  AutofillHints.username,
+                                ],
                                 textInputAction: TextInputAction.next,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -197,19 +203,30 @@ class _LoginViewState extends ConsumerState<LoginView> {
                             children: [
                               Row(
                                 children: [
-                                  Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                                  Expanded(
+                                    child: Divider(
+                                      color: theme.colorScheme.outlineVariant,
+                                    ),
+                                  ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
                                     child: Text(
                                       'OR',
                                       style: TextStyle(
                                         fontFamily: 'Caveat',
                                         fontSize: 16,
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
-                                  Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                                  Expanded(
+                                    child: Divider(
+                                      color: theme.colorScheme.outlineVariant,
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 16),
@@ -219,7 +236,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 child: OutlinedButton.icon(
                                   onPressed: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Google Sign-In coming soon')),
+                                      const SnackBar(
+                                        content: Text(
+                                          'Google Sign-In coming soon',
+                                        ),
+                                      ),
                                     );
                                   },
                                   style: OutlinedButton.styleFrom(
@@ -234,10 +255,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                     'assets/images/google_logo.png',
                                     height: 24,
                                     width: 24,
-                                    errorBuilder: (context, error, stackTrace) => Icon(
-                                      Icons.g_mobiledata,
-                                      color: theme.colorScheme.primary,
-                                    ),
+                                    errorBuilder:
+                                        (context, error, stackTrace) => Icon(
+                                          Icons.g_mobiledata,
+                                          color: theme.colorScheme.primary,
+                                        ),
                                   ),
                                   label: const Text(
                                     'Sign in with Google',

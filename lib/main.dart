@@ -8,20 +8,14 @@ import 'shared/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Load environment variables
   await dotenv.load(fileName: ".env");
-  
+
   // Initialize Firebase with secure options
-  await Firebase.initializeApp(
-    options: SecureFirebaseOptions.currentPlatform,
-  );
-  
-  runApp(
-    const ProviderScope(
-      child: CalderumApp(),
-    ),
-  );
+  await Firebase.initializeApp(options: SecureFirebaseOptions.currentPlatform);
+
+  runApp(const ProviderScope(child: CalderumApp()));
 }
 
 class CalderumApp extends ConsumerWidget {
@@ -30,7 +24,7 @@ class CalderumApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
-    
+
     return MaterialApp.router(
       title: 'Calderum - Hot Reload Test!',
       debugShowCheckedModeBanner: false,

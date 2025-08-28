@@ -48,16 +48,11 @@ class HomeView extends ConsumerWidget {
                       color: AppTheme.secondaryColor,
                     ),
                     const SizedBox(height: 20),
-                    Text(
-                      'Ready to Brew?',
-                      style: AppTheme.headlineStyle,
-                    ),
+                    Text('Ready to Brew?', style: AppTheme.headlineStyle),
                     const SizedBox(height: 8),
                     Text(
                       'Create or join a magical brewing session',
-                      style: AppTheme.bodyStyle.copyWith(
-                        color: Colors.white60,
-                      ),
+                      style: AppTheme.bodyStyle.copyWith(color: Colors.white60),
                       textAlign: TextAlign.center,
                     ),
                   ],

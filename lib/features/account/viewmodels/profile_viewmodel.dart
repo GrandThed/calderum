@@ -10,16 +10,10 @@ part 'profile_viewmodel.g.dart';
 class ProfileState {
   final bool isLoading;
   final String? errorMessage;
-  
-  const ProfileState({
-    this.isLoading = false,
-    this.errorMessage,
-  });
-  
-  ProfileState copyWith({
-    bool? isLoading,
-    String? errorMessage,
-  }) {
+
+  const ProfileState({this.isLoading = false, this.errorMessage});
+
+  ProfileState copyWith({bool? isLoading, String? errorMessage}) {
     return ProfileState(
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
@@ -38,7 +32,7 @@ class ProfileViewModel extends _$ProfileViewModel {
     _authService = ref.watch(authServiceProvider);
     _firestore = FirebaseFirestore.instance;
     _auth = FirebaseAuth.instance;
-    
+
     return const ProfileState();
   }
 
@@ -47,7 +41,7 @@ class ProfileViewModel extends _$ProfileViewModel {
     String? photoUrl,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    
+
     try {
       final user = _auth.currentUser;
       if (user == null) {
@@ -67,13 +61,10 @@ class ProfileViewModel extends _$ProfileViewModel {
       });
 
       // Refresh the user model - refresh is handled by the auth state stream
-      
+
       state = state.copyWith(isLoading: false);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
@@ -83,7 +74,7 @@ class ProfileViewModel extends _$ProfileViewModel {
     int? totalPoints,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    
+
     try {
       final user = _auth.currentUser;
       if (user == null) {
@@ -99,19 +90,16 @@ class ProfileViewModel extends _$ProfileViewModel {
         await _firestore.collection('users').doc(user.uid).update(updates);
         // Refresh is handled by the auth state stream
       }
-      
+
       state = state.copyWith(isLoading: false);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
   Future<void> deleteAccount() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    
+
     try {
       final user = _auth.currentUser;
       if (user == null) {
@@ -120,22 +108,19 @@ class ProfileViewModel extends _$ProfileViewModel {
 
       // Delete user data from Firestore
       await _firestore.collection('users').doc(user.uid).delete();
-      
+
       // Delete the Firebase Auth account
       await user.delete();
-      
+
       state = state.copyWith(isLoading: false);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString(),
-      );
-      
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+
       // If deletion requires recent authentication
       if (e is FirebaseAuthException && e.code == 'requires-recent-login') {
         throw 'Please sign out and sign in again before deleting your account';
       }
-      
+
       rethrow;
     }
   }

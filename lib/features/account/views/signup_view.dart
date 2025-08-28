@@ -31,7 +31,9 @@ class _SignupViewState extends ConsumerState<SignupView> {
 
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(authViewModelProvider.notifier).signUp(
+      await ref
+          .read(authViewModelProvider.notifier)
+          .signUp(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             displayName: _nameController.text.trim(),

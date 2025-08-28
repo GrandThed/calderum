@@ -128,12 +128,12 @@ class _SignupViewState extends ConsumerState<SignupView> {
 
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     // TODO: Implement actual signup logic
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (mounted) {
       setState(() => _isLoading = false);
       context.go(RoutePaths.home);

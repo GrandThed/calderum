@@ -97,7 +97,14 @@
       "Bash(echo $PATH)",
       "Bash(PATH=\"/c/flutter_sdk/flutter/bin:$PATH\")",
       "Bash(dart:*)",
-      "mcp__dart-mcp__pub"
+      "mcp__dart-mcp__pub",
+      "WebFetch(domain:pub.dev)",
+      "mcp__dart-mcp__connect_dart_tooling_daemon",
+      "mcp__dart-mcp__hot_reload",
+      "mcp__dart-mcp__get_runtime_errors",
+      "mcp__dart-mcp__dart_format",
+      "mcp__dart-mcp__run_tests",
+      "mcp__dart-mcp__add_roots"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

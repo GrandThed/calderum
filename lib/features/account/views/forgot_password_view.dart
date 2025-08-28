@@ -8,8 +8,7 @@ class ForgotPasswordView extends ConsumerStatefulWidget {
   const ForgotPasswordView({super.key});
 
   @override
-  ConsumerState<ForgotPasswordView> createState() =>
-      _ForgotPasswordViewState();
+  ConsumerState<ForgotPasswordView> createState() => _ForgotPasswordViewState();
 }
 
 class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
@@ -53,10 +52,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: theme.colorScheme.onBackground,
-          ),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onBackground),
           onPressed: () => context.pop(),
         ),
       ),
@@ -98,11 +94,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.lock_reset,
-            size: 64,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.lock_reset, size: 64, color: theme.colorScheme.primary),
           const SizedBox(height: 24),
           Text(
             'Reset Password',
@@ -171,11 +163,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          Icons.check_circle,
-          size: 64,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(Icons.check_circle, size: 64, color: theme.colorScheme.primary),
         const SizedBox(height: 24),
         Text(
           'Email Sent!',

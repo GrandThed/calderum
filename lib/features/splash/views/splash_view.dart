@@ -22,7 +22,7 @@ class _SplashViewState extends ConsumerState<SplashView> {
 
   Future<void> _checkAuthStatus() async {
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (mounted) {
       final authState = ref.read(authStateChangesProvider);
       authState.when(
@@ -47,20 +47,14 @@ class _SplashViewState extends ConsumerState<SplashView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.science,
-              size: 120,
-              color: AppTheme.secondaryColor,
-            ),
+            Icon(Icons.science, size: 120, color: AppTheme.secondaryColor),
             const SizedBox(height: 24),
             Text(
               'Calderum',
               style: AppTheme.headlineStyle.copyWith(fontSize: 48),
             ),
             const SizedBox(height: 48),
-            const CalderumLoading(
-              message: 'Preparing your cauldron...',
-            ),
+            const CalderumLoading(message: 'Preparing your cauldron...'),
           ],
         ),
       ),

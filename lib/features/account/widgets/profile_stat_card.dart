@@ -25,11 +25,7 @@ class ProfileStatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 24,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(icon, size: 24, color: theme.colorScheme.primary),
           const SizedBox(height: 8),
           Text(
             value,

@@ -5,10 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(
-    FirebaseAuth.instance,
-    FirebaseFirestore.instance,
-  );
+  return AuthService(FirebaseAuth.instance, FirebaseFirestore.instance);
 });
 
 class AuthService {
@@ -31,10 +28,7 @@ class AuthService {
     final doc = await _firestore.collection('users').doc(user.uid).get();
     if (!doc.exists) return null;
 
-    return UserModel.fromJson({
-      ...doc.data()!,
-      'uid': user.uid,
-    });
+    return UserModel.fromJson({...doc.data()!, 'uid': user.uid});
   }
 
   Future<UserModel> signInWithEmailAndPassword({
@@ -100,9 +94,7 @@ class AuthService {
       lastLogin: DateTime.now(),
     );
 
-    await _firestore.collection('users').doc(user.uid).set(
-          userModel.toJson(),
-        );
+    await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
 
     return userModel;
   }

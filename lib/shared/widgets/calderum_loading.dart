@@ -5,11 +5,7 @@ class CalderumLoading extends StatelessWidget {
   final String? message;
   final double size;
 
-  const CalderumLoading({
-    super.key,
-    this.message,
-    this.size = 50,
-  });
+  const CalderumLoading({super.key, this.message, this.size = 50});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +27,7 @@ class CalderumLoading extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               message!,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
           ],
         ],
