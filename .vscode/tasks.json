@@ -5,14 +5,11 @@
       "label": "Start MCP Server",
       "type": "shell",
       "command": "dart",
-      "args": ["mcp-server"],
+      "args": ["mcp-server", "--log-file", "mcp-server.log"],
       "isBackground": true,
-      "problemMatcher": [],
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
+      "problemMatcher": "$dart-build_runner",
       "presentation": {
-        "reveal": "never",
+        "reveal": "always",
         "panel": "dedicated",
         "showReuseMessage": false
       },
