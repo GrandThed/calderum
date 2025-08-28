@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/account/views/login_view.dart';
 import '../features/account/views/signup_view.dart';
 import '../features/account/views/forgot_password_view.dart';
+import '../features/account/views/profile_view.dart';
 import '../features/home/views/home_view.dart';
 import '../shared/constants/route_paths.dart';
 import '../features/account/viewmodels/auth_viewmodel.dart';
@@ -74,9 +75,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'profile',
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: const Scaffold(
-            body: Center(child: Text('Profile - Coming Soon')),
-          ),
+          child: const ProfileView(),
         ),
       ),
     ],

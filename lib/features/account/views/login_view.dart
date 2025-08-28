@@ -83,7 +83,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                         ),
                         const SizedBox(height: 32),
                         Text(
-                          'Welcome to Calderum',
+                          '🧙‍♂️ Welcome to Calderum',
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontFamily: 'Caudex',
                             fontWeight: FontWeight.bold,
@@ -91,7 +91,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Sign in to continue',
+                          '🔮 Begin your magical journey',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontFamily: 'Caveat',
                             fontSize: 18,
@@ -180,7 +180,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 ),
                               ),
                               child: const Text(
-                                'Sign In',
+                                '✨ Sign In',
                                 style: TextStyle(
                                   fontFamily: 'Caudex',
                                   fontSize: 16,
@@ -217,8 +217,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 width: double.infinity,
                                 height: 48,
                                 child: OutlinedButton.icon(
-                                  onPressed: () async {
-                                    await ref.read(authViewModelProvider.notifier).signInWithGoogle();
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Google Sign-In coming soon')),
+                                    );
                                   },
                                   style: OutlinedButton.styleFrom(
                                     shape: RoundedRectangleBorder(

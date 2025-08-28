@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user_model.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -14,7 +14,9 @@ final authServiceProvider = Provider<AuthService>((ref) {
 class AuthService {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  // final GoogleSignIn _googleSignIn = GoogleSignIn(
+  //   scopes: ['email'],
+  // );
 
   AuthService(this._auth, this._firestore);
 
@@ -71,36 +73,13 @@ class AuthService {
   }
 
   Future<UserModel> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
-      if (googleUser == null) {
-        throw 'Sign in cancelled by user';
-      }
-
-      final GoogleSignInAuthentication googleAuth = 
-          await googleUser.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-      
-      return await _updateUserData(userCredential.user!);
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } catch (e) {
-      throw 'Failed to sign in with Google: $e';
-    }
+    // TODO: Implement Google Sign-In once API is clarified
+    throw 'Google Sign-In not implemented yet';
   }
 
   Future<void> signOut() async {
-    await Future.wait([
-      _auth.signOut(),
-      _googleSignIn.signOut(),
-    ]);
+    await _auth.signOut();
+    // await _googleSignIn.signOut(); // TODO: Add back when Google Sign-In is implemented
   }
 
   Future<void> resetPassword(String email) async {
