@@ -32,7 +32,7 @@ class CalderumApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     
     return MaterialApp.router(
-      title: 'Calderum',
+      title: 'Calderum - Hot Reload Test!',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       routerConfig: router,
