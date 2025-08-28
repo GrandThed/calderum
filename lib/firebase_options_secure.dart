@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Secure [FirebaseOptions] that loads credentials from environment variables
-/// 
+///
 /// This approach keeps sensitive API keys out of version control
 /// Make sure to load dotenv before initializing Firebase:
 /// ```dart

@@ -23,17 +23,15 @@ class ProfileAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: theme.colorScheme.primaryContainer,
-        border: Border.all(
-          color: theme.colorScheme.primary,
-          width: 3,
-        ),
+        border: Border.all(color: theme.colorScheme.primary, width: 3),
       ),
       child: photoUrl != null && photoUrl!.isNotEmpty
           ? ClipOval(
               child: Image.network(
                 photoUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _buildInitial(initial, theme),
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildInitial(initial, theme),
               ),
             )
           : _buildInitial(initial, theme),

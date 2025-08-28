@@ -23,9 +23,7 @@ class AppTheme {
         onBackground: Colors.white,
         onError: Colors.white,
       ),
-      textTheme: ThemeData.dark().textTheme.apply(
-        fontFamily: 'Caudex',
-      ),
+      textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Caudex'),
       appBarTheme: const AppBarTheme(
         backgroundColor: surfaceColor,
         foregroundColor: Colors.white,
@@ -40,9 +38,7 @@ class AppTheme {
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -64,7 +60,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: errorColor, width: 1),
         ),
-        labelStyle: const TextStyle(fontFamily: 'Caudex', color: Colors.white70),
+        labelStyle: const TextStyle(
+          fontFamily: 'Caudex',
+          color: Colors.white70,
+        ),
         hintStyle: const TextStyle(fontFamily: 'Caudex', color: Colors.white38),
       ),
     );
@@ -84,9 +83,6 @@ class AppTheme {
     color: Colors.white,
   );
 
-  static TextStyle get bodyStyle => const TextStyle(
-    fontFamily: 'Caudex',
-    fontSize: 16,
-    color: Colors.white,
-  );
+  static TextStyle get bodyStyle =>
+      const TextStyle(fontFamily: 'Caudex', fontSize: 16, color: Colors.white);
 }

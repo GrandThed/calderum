@@ -11,7 +11,7 @@ import '../features/account/viewmodels/auth_viewmodel.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateStreamProvider);
-  
+
   return GoRouter(
     initialLocation: RoutePaths.login,
     debugLogDiagnostics: true,
@@ -19,34 +19,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.login,
         name: 'login',
-        pageBuilder: (context, state) => MaterialPage(
-          key: state.pageKey,
-          child: const LoginView(),
-        ),
+        pageBuilder: (context, state) =>
+            MaterialPage(key: state.pageKey, child: const LoginView()),
       ),
       GoRoute(
         path: RoutePaths.signup,
         name: 'signup',
-        pageBuilder: (context, state) => MaterialPage(
-          key: state.pageKey,
-          child: const SignupView(),
-        ),
+        pageBuilder: (context, state) =>
+            MaterialPage(key: state.pageKey, child: const SignupView()),
       ),
       GoRoute(
         path: '/forgot-password',
         name: 'forgot-password',
-        pageBuilder: (context, state) => MaterialPage(
-          key: state.pageKey,
-          child: const ForgotPasswordView(),
-        ),
+        pageBuilder: (context, state) =>
+            MaterialPage(key: state.pageKey, child: const ForgotPasswordView()),
       ),
       GoRoute(
         path: RoutePaths.home,
         name: 'home',
-        pageBuilder: (context, state) => MaterialPage(
-          key: state.pageKey,
-          child: const HomeView(),
-        ),
+        pageBuilder: (context, state) =>
+            MaterialPage(key: state.pageKey, child: const HomeView()),
         routes: [
           GoRoute(
             path: 'create-room',
@@ -73,27 +65,25 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.profile,
         name: 'profile',
-        pageBuilder: (context, state) => MaterialPage(
-          key: state.pageKey,
-          child: const ProfileView(),
-        ),
+        pageBuilder: (context, state) =>
+            MaterialPage(key: state.pageKey, child: const ProfileView()),
       ),
     ],
     redirect: (context, state) {
       final isAuth = authState.value != null;
       final isLoggingIn = state.matchedLocation == RoutePaths.login;
       final isSigningUp = state.matchedLocation == RoutePaths.signup;
-      
+
       // If not authenticated and not on auth pages, redirect to login
       if (!isAuth && !isLoggingIn && !isSigningUp) {
         return RoutePaths.login;
       }
-      
+
       // If authenticated and on auth pages, redirect to home
       if (isAuth && (isLoggingIn || isSigningUp)) {
         return RoutePaths.home;
       }
-      
+
       return null;
     },
   );

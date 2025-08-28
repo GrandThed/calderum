@@ -14,7 +14,7 @@ class AuthViewModel extends _$AuthViewModel {
   @override
   AuthState build() {
     _authService = ref.watch(authServiceProvider);
-    
+
     ref.listen(authStateStreamProvider, (previous, next) {
       next.when(
         data: (user) async {
@@ -35,10 +35,7 @@ class AuthViewModel extends _$AuthViewModel {
     return const AuthState.initial();
   }
 
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     state = const AuthState.loading();
     try {
       final user = await _authService.signInWithEmailAndPassword(

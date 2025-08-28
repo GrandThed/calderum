@@ -48,9 +48,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   const SizedBox(height: 8),
                   Text(
                     'Brew Your Magic',
-                    style: AppTheme.bodyStyle.copyWith(
-                      color: Colors.white60,
-                    ),
+                    style: AppTheme.bodyStyle.copyWith(color: Colors.white60),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
@@ -110,12 +108,12 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     // TODO: Implement actual login logic
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (mounted) {
       setState(() => _isLoading = false);
       context.go(RoutePaths.home);

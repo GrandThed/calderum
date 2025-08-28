@@ -36,9 +36,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
   Future<void> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(profileViewModelProvider.notifier).updateProfile(
-            displayName: _displayNameController.text.trim(),
-          );
+      await ref
+          .read(profileViewModelProvider.notifier)
+          .updateProfile(displayName: _displayNameController.text.trim());
       setState(() {
         _isEditing = false;
       });
@@ -49,10 +49,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Sign Out',
-          style: TextStyle(fontFamily: 'Caudex'),
-        ),
+        title: const Text('Sign Out', style: TextStyle(fontFamily: 'Caudex')),
         content: const Text(
           'Are you sure you want to sign out?',
           style: TextStyle(fontFamily: 'Caveat', fontSize: 18),
@@ -101,9 +98,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
       ),
       body: userAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Text('Error: $error'),
-        ),
+        error: (error, _) => Center(child: Text('Error: $error')),
         data: (user) {
           if (user == null) {
             return const Center(child: Text('No user data available'));
@@ -119,7 +114,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   size: 100,
                 ),
                 const SizedBox(height: 24),
-                
+
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -194,10 +189,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             value: user.displayName,
                           ),
                           const SizedBox(height: 12),
-                          _InfoRow(
-                            label: 'Email',
-                            value: user.email,
-                          ),
+                          _InfoRow(label: 'Email', value: user.email),
                           if (user.createdAt != null) ...[
                             const SizedBox(height: 12),
                             _InfoRow(
@@ -218,7 +210,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -279,7 +271,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.lock_outline),
@@ -298,9 +290,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                     },
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 TextButton(
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
@@ -329,7 +321,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         ],
                       ),
                     );
-                    
+
                     if (confirm == true) {
                       // TODO: Implement account deletion
                       if (!mounted) return;
@@ -365,15 +357,12 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({
-    required this.label,
-    required this.value,
-  });
+  const _InfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -391,10 +380,7 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontFamily: 'Caudex',
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontFamily: 'Caudex', fontSize: 16),
           ),
         ),
       ],
