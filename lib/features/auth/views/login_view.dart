@@ -57,7 +57,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     label: 'Email',
                     hint: 'Enter your email',
                     keyboardType: TextInputType.emailAddress,
-                    prefixIcon: const Icon(Icons.email, color: Colors.white54),
+                    prefixIcon: Icons.email,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
@@ -74,7 +74,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     label: 'Password',
                     hint: 'Enter your password',
                     obscureText: true,
-                    prefixIcon: const Icon(Icons.lock, color: Colors.white54),
+                    prefixIcon: Icons.lock,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
@@ -95,7 +95,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   CalderumButton(
                     text: 'Create Account',
                     onPressed: () => context.push(RoutePaths.signup),
-                    isOutlined: true,
+                    style: CalderumButtonStyle.outlined,
                   ),
                 ],
               ),

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user_model.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -11,9 +11,7 @@ final authServiceProvider = Provider<AuthService>((ref) {
 class AuthService {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  // final GoogleSignIn _googleSignIn = GoogleSignIn(
-  //   scopes: ['email'],
-  // );
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   AuthService(this._auth, this._firestore);
 
@@ -67,13 +65,52 @@ class AuthService {
   }
 
   Future<UserModel> signInWithGoogle() async {
-    // TODO: Implement Google Sign-In once API is clarified
-    throw 'Google Sign-In not implemented yet';
+    try {
+      print('🔍 Starting Google Sign-In process...');
+      
+      // Initialize Google Sign-In with proper configuration
+      await _googleSignIn.initialize(
+        clientId: '549073578108-2rmn4e2k4jooqg3r89lda3be39aoobvs.apps.googleusercontent.com',
+        serverClientId: '549073578108-ka9hs571k3qan6mof1g5bgcrhtjsv1qh.apps.googleusercontent.com',
+      );
+      print('✅ Google Sign-In initialized');
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
+      print('👤 Google user authenticated: ${googleUser?.email}');
+
+      if (googleUser == null) {
+        throw 'Google sign-in was cancelled';
+      }
+
+      final GoogleSignInAuthentication googleAuth = 
+          googleUser.authentication;
+      print('🔑 Got authentication token');
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+      print('🎫 Created Firebase credential');
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      print('🔥 Signed in to Firebase: ${userCredential.user?.uid}');
+
+      final userModel = await _updateUserData(userCredential.user!);
+      print('💾 User data updated successfully');
+      
+      return userModel;
+    } on FirebaseAuthException catch (e) {
+      print('❌ Firebase Auth Error: ${e.code} - ${e.message}');
+      throw _handleAuthException(e);
+    } catch (e, stackTrace) {
+      print('❌ General Error: $e');
+      print('📍 Stack Trace: $stackTrace');
+      throw 'Failed to sign in with Google: $e';
+    }
   }
 
   Future<void> signOut() async {
     await _auth.signOut();
-    // await _googleSignIn.signOut(); // TODO: Add back when Google Sign-In is implemented
+    await _googleSignIn.signOut();
   }
 
   Future<void> resetPassword(String email) async {
@@ -85,36 +122,83 @@ class AuthService {
   }
 
   Future<UserModel> _createUserData(User user) async {
-    final userModel = UserModel(
-      uid: user.uid,
-      email: user.email!,
-      displayName: user.displayName ?? '',
-      photoUrl: user.photoURL,
-      createdAt: DateTime.now(),
-      lastLogin: DateTime.now(),
-    );
+    return await _retryFirestoreOperation(() async {
+      final userModel = UserModel(
+        uid: user.uid,
+        email: user.email!,
+        displayName: user.displayName ?? '',
+        photoUrl: user.photoURL,
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+      );
 
-    await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
-
-    return userModel;
+      try {
+        await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
+        return userModel;
+      } catch (e) {
+        // If user already exists, fetch the existing data
+        if (e.toString().contains('DUPLICATE_RAW_ID') || 
+            e.toString().contains('already exists')) {
+          print('ℹ️ User document already exists, fetching existing data');
+          final doc = await _firestore.collection('users').doc(user.uid).get();
+          if (doc.exists) {
+            return UserModel.fromJson({...doc.data()!, 'uid': user.uid});
+          }
+        }
+        rethrow;
+      }
+    });
   }
 
   Future<UserModel> _updateUserData(User user) async {
-    final doc = await _firestore.collection('users').doc(user.uid).get();
+    return await _retryFirestoreOperation(() async {
+      final doc = await _firestore.collection('users').doc(user.uid).get();
 
-    if (!doc.exists) {
-      return await _createUserData(user);
+      if (!doc.exists) {
+        return await _createUserData(user);
+      }
+
+      await _firestore.collection('users').doc(user.uid).update({
+        'lastLogin': DateTime.now().toIso8601String(),
+      });
+
+      return UserModel.fromJson({
+        ...doc.data()!,
+        'uid': user.uid,
+        'lastLogin': DateTime.now().toIso8601String(),
+      });
+    });
+  }
+
+  Future<T> _retryFirestoreOperation<T>(Future<T> Function() operation) async {
+    int retryCount = 0;
+    const maxRetries = 3;
+    const baseDelay = Duration(seconds: 1);
+
+    while (retryCount < maxRetries) {
+      try {
+        return await operation();
+      } catch (e) {
+        retryCount++;
+        
+        if (e.toString().contains('unavailable') && retryCount < maxRetries) {
+          print('🔄 Firestore unavailable, retrying in ${baseDelay.inSeconds * retryCount}s (attempt $retryCount/$maxRetries)');
+          await Future.delayed(baseDelay * retryCount);
+          continue;
+        }
+        
+        // If it's a duplicate user error, let the specific method handle it
+        if (e.toString().contains('DUPLICATE_RAW_ID') || 
+            e.toString().contains('already exists')) {
+          print('ℹ️ Duplicate user error detected, letting specific handler manage it');
+          rethrow;
+        }
+        
+        rethrow;
+      }
     }
-
-    await _firestore.collection('users').doc(user.uid).update({
-      'lastLogin': DateTime.now().toIso8601String(),
-    });
-
-    return UserModel.fromJson({
-      ...doc.data()!,
-      'uid': user.uid,
-      'lastLogin': DateTime.now().toIso8601String(),
-    });
+    
+    throw Exception('Maximum retries exceeded for Firestore operation');
   }
 
   String _handleAuthException(FirebaseAuthException e) {
