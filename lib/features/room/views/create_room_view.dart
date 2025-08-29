@@ -14,8 +14,6 @@ class CreateRoomView extends ConsumerStatefulWidget {
 }
 
 class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
-  int _maxPlayers = 4;
-  int _minPlayers = 2;
   IngredientSet _ingredientSet = IngredientSet.set1;
   bool _testTubeVariant = false;
   int _turnTimerSeconds = 30;
@@ -78,32 +76,6 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
                             color: theme.colorScheme.primary,
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        
-                        // Player settings
-                        _buildSectionTitle('👥 Players'),
-                        const SizedBox(height: 16),
-                        
-                        _buildSliderSetting(
-                          label: 'Maximum Players',
-                          value: _maxPlayers.toDouble(),
-                          min: 2,
-                          max: 6,
-                          divisions: 4,
-                          onChanged: (value) => setState(() => _maxPlayers = value.toInt()),
-                          valueText: '$_maxPlayers players',
-                        ),
-                        
-                        _buildSliderSetting(
-                          label: 'Minimum Players',
-                          value: _minPlayers.toDouble(),
-                          min: 2,
-                          max: _maxPlayers.toDouble(),
-                          divisions: _maxPlayers - 2,
-                          onChanged: (value) => setState(() => _minPlayers = value.toInt()),
-                          valueText: '$_minPlayers players',
-                        ),
-                        
                         const SizedBox(height: 24),
                         
                         // Game settings
@@ -296,8 +268,8 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
 
   void _createRoom() {
     final settings = RoomSettingsModel(
-      maxPlayers: _maxPlayers,
-      minPlayers: _minPlayers,
+      maxPlayers: 4, // Always 4 for Quacks of Quedlinburg
+      minPlayers: 1, // Dynamic - players can join anytime
       ingredientSet: _ingredientSet,
       testTubeVariant: _testTubeVariant,
       turnTimerSeconds: _turnTimerSeconds,
