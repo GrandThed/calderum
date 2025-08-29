@@ -68,7 +68,7 @@ class HomeView extends ConsumerWidget {
               CalderumButton(
                 text: 'Join Room',
                 onPressed: () => context.push(RoutePaths.joinRoom),
-                isOutlined: true,
+                style: CalderumButtonStyle.outlined,
                 icon: Icons.group_add,
               ),
             ],
