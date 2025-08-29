@@ -219,6 +219,79 @@ class _SignupViewState extends ConsumerState<SignupView> {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        authState.maybeWhen(
+                          loading: () => const SizedBox.shrink(),
+                          orElse: () => Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Divider(
+                                      color: theme.colorScheme.outlineVariant,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: Text(
+                                      'OR',
+                                      style: TextStyle(
+                                        fontFamily: 'Caveat',
+                                        fontSize: 16,
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Divider(
+                                      color: theme.colorScheme.outlineVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: OutlinedButton.icon(
+                                  onPressed: () async {
+                                    await ref
+                                        .read(authViewModelProvider.notifier)
+                                        .signInWithGoogle();
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    side: BorderSide(
+                                      color: theme.colorScheme.outline,
+                                    ),
+                                  ),
+                                  icon: Image.asset(
+                                    'assets/images/google_logo.png',
+                                    height: 24,
+                                    width: 24,
+                                    errorBuilder:
+                                        (context, error, stackTrace) => Icon(
+                                          Icons.g_mobiledata,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                  ),
+                                  label: const Text(
+                                    'Sign up with Google',
+                                    style: TextStyle(
+                                      fontFamily: 'Caudex',
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

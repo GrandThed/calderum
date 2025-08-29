@@ -234,14 +234,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 width: double.infinity,
                                 height: 48,
                                 child: OutlinedButton.icon(
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Google Sign-In coming soon',
-                                        ),
-                                      ),
-                                    );
+                                  onPressed: () async {
+                                    await ref
+                                        .read(authViewModelProvider.notifier)
+                                        .signInWithGoogle();
                                   },
                                   style: OutlinedButton.styleFrom(
                                     shape: RoundedRectangleBorder(

@@ -49,7 +49,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     controller: _nameController,
                     label: 'Display Name',
                     hint: 'Choose your wizard name',
-                    prefixIcon: const Icon(Icons.person, color: Colors.white54),
+                    prefixIcon: Icons.person,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your name';
@@ -66,7 +66,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     label: 'Email',
                     hint: 'Enter your email',
                     keyboardType: TextInputType.emailAddress,
-                    prefixIcon: const Icon(Icons.email, color: Colors.white54),
+                    prefixIcon: Icons.email,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
@@ -83,7 +83,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     label: 'Password',
                     hint: 'Create a strong password',
                     obscureText: true,
-                    prefixIcon: const Icon(Icons.lock, color: Colors.white54),
+                    prefixIcon: Icons.lock,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a password';
@@ -100,7 +100,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     label: 'Confirm Password',
                     hint: 'Re-enter your password',
                     obscureText: true,
-                    prefixIcon: const Icon(Icons.lock, color: Colors.white54),
+                    prefixIcon: Icons.lock,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please confirm your password';

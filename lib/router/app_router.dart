@@ -6,6 +6,9 @@ import '../features/account/views/signup_view.dart';
 import '../features/account/views/forgot_password_view.dart';
 import '../features/account/views/profile_view.dart';
 import '../features/home/views/home_view.dart';
+import '../features/room/views/create_room_view.dart';
+import '../features/room/views/join_room_view.dart';
+import '../features/room/views/room_lobby_view.dart';
 import '../shared/constants/route_paths.dart';
 import '../features/account/viewmodels/auth_viewmodel.dart';
 
@@ -39,28 +42,29 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'home',
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const HomeView()),
-        routes: [
-          GoRoute(
-            path: 'create-room',
-            name: 'create-room',
-            pageBuilder: (context, state) => MaterialPage(
-              key: state.pageKey,
-              child: const Scaffold(
-                body: Center(child: Text('Create Room - Coming Soon')),
-              ),
-            ),
-          ),
-          GoRoute(
-            path: 'join-room',
-            name: 'join-room',
-            pageBuilder: (context, state) => MaterialPage(
-              key: state.pageKey,
-              child: const Scaffold(
-                body: Center(child: Text('Join Room - Coming Soon')),
-              ),
-            ),
-          ),
-        ],
+      ),
+      GoRoute(
+        path: RoutePaths.createRoom,
+        name: 'create-room',
+        pageBuilder: (context, state) =>
+            MaterialPage(key: state.pageKey, child: const CreateRoomView()),
+      ),
+      GoRoute(
+        path: RoutePaths.joinRoom,
+        name: 'join-room',
+        pageBuilder: (context, state) =>
+            MaterialPage(key: state.pageKey, child: const JoinRoomView()),
+      ),
+      GoRoute(
+        path: '${RoutePaths.room}/:roomId',
+        name: 'room',
+        pageBuilder: (context, state) {
+          final roomId = state.pathParameters['roomId']!;
+          return MaterialPage(
+            key: state.pageKey,
+            child: RoomLobbyView(roomId: roomId),
+          );
+        },
       ),
       GoRoute(
         path: RoutePaths.profile,

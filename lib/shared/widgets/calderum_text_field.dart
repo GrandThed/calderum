@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 
 class CalderumTextField extends StatelessWidget {
@@ -7,15 +8,17 @@ class CalderumTextField extends StatelessWidget {
   final String? hint;
   final bool obscureText;
   final TextInputType keyboardType;
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
+  final IconData? prefixIcon;
+  final Widget? suffixIcon;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final void Function(String)? onFieldSubmitted;
+  final TextInputAction? textInputAction;
   final int? maxLength;
   final int maxLines;
   final bool enabled;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
-  final TextInputAction? textInputAction;
-  final void Function(String)? onFieldSubmitted;
 
   const CalderumTextField({
     super.key,
@@ -24,15 +27,17 @@ class CalderumTextField extends StatelessWidget {
     this.hint,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
+    this.prefixIcon,
+    this.suffixIcon,
     this.validator,
     this.onChanged,
+    this.onFieldSubmitted,
+    this.textInputAction,
     this.maxLength,
     this.maxLines = 1,
     this.enabled = true,
-    this.prefixIcon,
-    this.suffixIcon,
-    this.textInputAction,
-    this.onFieldSubmitted,
   });
 
   @override
@@ -41,20 +46,22 @@ class CalderumTextField extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
+      inputFormatters: inputFormatters,
       validator: validator,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted,
+      textInputAction: textInputAction,
       maxLength: maxLength,
       maxLines: maxLines,
       enabled: enabled,
-      textInputAction: textInputAction,
-      onFieldSubmitted: onFieldSubmitted,
       style: const TextStyle(color: Colors.white, fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         labelStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
         hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-        prefixIcon: prefixIcon,
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
         suffixIcon: suffixIcon,
         filled: true,
         fillColor: AppTheme.surfaceColor.withOpacity(0.5),
