@@ -104,7 +104,9 @@
       "mcp__dart-mcp__get_runtime_errors",
       "mcp__dart-mcp__dart_format",
       "mcp__dart-mcp__run_tests",
-      "mcp__dart-mcp__add_roots"
+      "mcp__dart-mcp__add_roots",
+      "mcp__dart-mcp__analyze_files",
+      "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

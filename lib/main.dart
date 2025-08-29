@@ -9,7 +9,7 @@ import 'shared/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
+  // Load environment vDTDariables
   await dotenv.load(fileName: ".env");
 
   // Initialize Firebase with secure options
