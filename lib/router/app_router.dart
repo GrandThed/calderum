@@ -7,7 +7,6 @@ import '../features/account/views/forgot_password_view.dart';
 import '../features/account/views/profile_view.dart';
 import '../features/home/views/home_view.dart';
 import '../features/room/views/create_room_view.dart';
-import '../features/room/views/join_room_view.dart';
 import '../features/room/views/room_lobby_view.dart';
 import '../shared/constants/route_paths.dart';
 import '../features/account/viewmodels/auth_viewmodel.dart';
@@ -48,12 +47,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'create-room',
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const CreateRoomView()),
-      ),
-      GoRoute(
-        path: RoutePaths.joinRoom,
-        name: 'join-room',
-        pageBuilder: (context, state) =>
-            MaterialPage(key: state.pageKey, child: const JoinRoomView()),
       ),
       GoRoute(
         path: '${RoutePaths.room}/:roomId',

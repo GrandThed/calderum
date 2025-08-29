@@ -52,12 +52,15 @@ flutter analyze
 - **When hot reload fails, analyze the code for errors first** - Use `mcp__dart-mcp__analyze_files` to check for compilation errors that prevent hot reload from working
 
 ## Current Status
-Phase 0 (Foundation) is complete. See `task.md` for detailed progress tracking.
-- ✅ Authentication system complete with Firebase
+Phase 0 (Foundation) and Phase 1 (Room Management) are complete. See `task.md` for detailed progress tracking.
+- ✅ Authentication system complete with Firebase (Google Sign-In integrated)
 - ✅ User profile management implemented
-- 🚀 Ready for Phase 1: Core Game Infrastructure (Room Management)
+- ✅ Room management system with instant creation and code-based joining
+- ✅ Streamlined home page with direct room code input and paste functionality
+- ✅ Dynamic room capacity (1-4 players, joins as players enter)
 - Using Riverpod for state management
 - Custom UI components with magical theme (Caudex and Caveat fonts)
+- Simple geometric ingredient icons for accessibility
 
 ## Game Rules Reference
 See `game_rules.md` for complete Quacks of Quedlinburg game mechanics:
@@ -145,14 +148,24 @@ The project implements secure Firebase credential management to protect sensitiv
 - `design.md` - UI/UX specifications and screen layouts
 - `task.md` - Development roadmap and sprint planning
 
+## Room Management Workflow
+- **Instant Room Creation**: Click "Create Room" immediately creates a room with default settings (max 4 players, all ingredient sets, 30s timers)
+- **Code-Based Joining**: Each room has a unique 6-character code (letters/numbers)
+- **Direct Input**: Home page has a room code field with paste functionality
+- **Auto-Join**: Pasting a valid 6-character code automatically attempts to join
+- **Dynamic Capacity**: Rooms adjust to 1-4 players as people join/leave
+- **No Separate Join Page**: Streamlined UX with everything on the home page
+
 ## Important Architectural Decisions
 1. **Dynamic Rooms**: Players can join/leave games in progress
-2. **No Public Rooms**: All games are private/invitation-based
+2. **No Public Rooms**: All games are private/invitation-based (code-based)
 3. **Firebase Exclusive**: All backend services through Firebase
 4. **Simultaneous Play**: Potions phase is not turn-based
-5. **Backend XP**: Experience system tracked but no UI yet
-6. **11 Achievements**: Simple achievement system (wins + ingredients)
-7. **Friends System**: Recent players recommendations
-8. **No Monetization**: Free-to-play, no shop or purchases
-9. **No Leaderboards**: Focus on friend-based competition
-10. **Emotes Only**: No text chat, just reaction buttons
+5. **Instant Creation**: Rooms created immediately without configuration screens
+6. **Code Sharing**: Primary method of room discovery via 6-character codes
+7. **Backend XP**: Experience system tracked but no UI yet
+8. **11 Achievements**: Simple achievement system (wins + ingredients)
+9. **Friends System**: Recent players recommendations
+10. **No Monetization**: Free-to-play, no shop or purchases
+11. **No Leaderboards**: Focus on friend-based competition
+12. **Emotes Only**: No text chat, just reaction buttons
