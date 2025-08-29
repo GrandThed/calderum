@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hexagon base for blue ingredient -->
+  <polygon points="24,6 36,14 36,34 24,42 12,34 12,14" fill="#4169E1" stroke="#6495ED" stroke-width="2"/>
+  <!-- Simple wave pattern inside -->
+  <path d="M16,20 Q20,16 24,20 Q28,24 32,20" stroke="#6495ED" stroke-width="2" fill="none"/>
+  <path d="M16,28 Q20,24 24,28 Q28,32 32,28" stroke="#6495ED" stroke-width="2" fill="none"/>
+</svg>
