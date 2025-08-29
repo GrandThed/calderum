@@ -59,6 +59,7 @@ dependencies:
   
   # Utilities
   share_plus: ^10.0.2
+  flutter_svg: ^2.0.10+1
   
 
 dev_dependencies:
@@ -93,6 +94,7 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/images/ingredients/
   
   # Using local fonts from assets folder
   fonts:
