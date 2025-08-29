@@ -168,33 +168,38 @@ Decorative Font: Caveat
 └─────────────────────────┘
 ```
 
-### 3. Active Games Screen
+### 3. Home Screen - Streamlined Room Management
 ```
 ┌─────────────────────────┐
-│ [Header: Profile | Friends] │
+│ [Calderum] [👤 Profile] │
 │                         │
-│   Welcome, [Username]   │
-│   Games Won: 42         │
-│                         │
-│ [Create New Game]       │
-│                         │
-│ Active Games (3)        │
 │ ┌─────────────────────┐ │
-│ │ Room: Mystic Tower  │ │
-│ │ Round 5/9           │ │
-│ │ 🟢 Your Turn!       │ │
-│ │ Players: 3/4 online │ │
-│ └─────────────────────┘ │
-│ ┌─────────────────────┐ │
-│ │ Room: Cauldron Club │ │
-│ │ Round 7/9           │ │
-│ │ ⏸️ Waiting...       │ │
-│ │ Players: 2/3 online │ │
+│ │   [🧪 Science Icon]  │ │
+│ │   Ready to Brew?    │ │
+│ │  Create or join a   │ │
+│ │ magical brewing     │ │
+│ │    session          │ │
 │ └─────────────────────┘ │
 │                         │
-│ [Completed Games]       │
+│ [🎯 Create Room] ←── Instant │
+│                         │
+│      ── OR ──           │
+│                         │
+│ Room Code              │
+│ ┌─────────────────────┐ │
+│ │ [🔑] ABC123        │ │ ← 6-char input
+│ └─────────────────────┘ │
+│ [🚀 Join Room] [📋 Paste] │
+│                         │
 └─────────────────────────┘
 ```
+
+**Key Changes:**
+- **Instant Room Creation**: Single button creates room immediately with defaults
+- **Direct Code Input**: Room code field directly on home page
+- **Paste Functionality**: Quick paste button with auto-join for valid codes  
+- **Streamlined UX**: No separate join room page needed
+- **6-Character Codes**: Alphanumeric room codes for easy sharing
 
 ### 4. Game Room/Lobby
 ```

@@ -31,23 +31,25 @@ Calderum is a digital adaptation of The Quacks of Quedlinburg, a push-your-luck 
 
 ### 2. Game Room Management
 
-#### 2.1 Room Creation
-- **FR-ROOM-001**: Users must be able to create private game rooms
-- **FR-ROOM-002**: Room creator must be able to set game parameters
-  - Number of rounds: 9 (fixed per game rules)
-  - Turn timer (15s, 30s, 45s, or unlimited)
-  - Ingredient Set (Set 1, Set 2, Set 3, Set 4, or Custom)
-  - Test Tube variant (On/Off)
-- **FR-ROOM-003**: System must generate unique 6-character room codes
-- **FR-ROOM-004**: Rooms must support 2-4 players
-- **FR-ROOM-005**: Users must be able to invite friends to rooms
+#### 2.1 Instant Room Creation
+- **FR-ROOM-001**: Users must be able to create private game rooms instantly from home page
+- **FR-ROOM-002**: Rooms must be created immediately with default settings:
+  - Maximum players: 4 (fixed for Quacks of Quedlinburg)
+  - Minimum players: 1 (dynamic joining)
+  - Turn timer: 30 seconds (configurable in room settings)
+  - Ingredient Set: Set 1 (configurable in room settings)
+  - Test Tube variant: Off (configurable in room settings)
+- **FR-ROOM-003**: System must generate unique 6-character alphanumeric room codes
+- **FR-ROOM-004**: Rooms must support dynamic 1-4 player capacity
+- **FR-ROOM-005**: Room settings must be configurable by host after creation
 
-#### 2.2 Dynamic Room Joining
-- **FR-JOIN-001**: Users must be able to join rooms via invitation
-- **FR-JOIN-002**: Users must be able to join rooms via room code
-- **FR-JOIN-003**: Users must be able to rejoin rooms they are part of
-- **FR-JOIN-004**: System must maintain player membership across disconnections
-- **FR-JOIN-005**: Players must be able to leave rooms temporarily without forfeiting
+#### 2.2 Streamlined Room Joining
+- **FR-JOIN-001**: Users must be able to join rooms by entering 6-character codes on home page
+- **FR-JOIN-002**: System must provide paste functionality for room codes from clipboard
+- **FR-JOIN-003**: System must auto-join when valid 6-character code is pasted
+- **FR-JOIN-004**: Users must be able to rejoin rooms they are part of
+- **FR-JOIN-005**: System must maintain player membership across disconnections
+- **FR-JOIN-006**: Players must be able to leave rooms temporarily without forfeiting
 - **FR-JOIN-006**: Games must continue when players are temporarily absent
 - **FR-JOIN-007**: System must notify players when it's their turn (even if offline)
 
