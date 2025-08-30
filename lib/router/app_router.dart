@@ -9,13 +9,10 @@ import '../features/home/views/home_view.dart';
 import '../features/room/views/create_room_view.dart';
 import '../features/room/views/room_lobby_view.dart';
 import '../shared/constants/route_paths.dart';
-import '../features/account/viewmodels/auth_viewmodel.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateStreamProvider);
-
   return GoRouter(
-    initialLocation: RoutePaths.login,
+    initialLocation: RoutePaths.home,
     debugLogDiagnostics: true,
     routes: [
       GoRoute(
@@ -66,22 +63,5 @@ final routerProvider = Provider<GoRouter>((ref) {
             MaterialPage(key: state.pageKey, child: const ProfileView()),
       ),
     ],
-    redirect: (context, state) {
-      final isAuth = authState.value != null;
-      final isLoggingIn = state.matchedLocation == RoutePaths.login;
-      final isSigningUp = state.matchedLocation == RoutePaths.signup;
-
-      // If not authenticated and not on auth pages, redirect to login
-      if (!isAuth && !isLoggingIn && !isSigningUp) {
-        return RoutePaths.login;
-      }
-
-      // If authenticated and on auth pages, redirect to home
-      if (isAuth && (isLoggingIn || isSigningUp)) {
-        return RoutePaths.home;
-      }
-
-      return null;
-    },
   );
 });

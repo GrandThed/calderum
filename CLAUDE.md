@@ -53,8 +53,11 @@ flutter analyze
 
 ## Current Status
 Phase 0 (Foundation) and Phase 1 (Room Management) are complete. See `task.md` for detailed progress tracking.
-- ✅ Authentication system complete with Firebase (Google Sign-In integrated)
-- ✅ User profile management implemented
+- ✅ **Anonymous-first authentication system** with Firebase Anonymous Auth
+- ✅ **Optional login** - Players can play immediately without signing up
+- ✅ **Random mage names** for anonymous users (e.g., "Gandalf (Anonymous)")
+- ✅ **Login prompts** at profile and match end to save progress
+- ✅ **Account linking** - Anonymous users can link to email/Google accounts
 - ✅ Room management system with instant creation and code-based joining
 - ✅ Streamlined home page with direct room code input and paste functionality
 - ✅ Dynamic room capacity (1-4 players, joins as players enter)
@@ -148,6 +151,16 @@ The project implements secure Firebase credential management to protect sensitiv
 - `design.md` - UI/UX specifications and screen layouts
 - `task.md` - Development roadmap and sprint planning
 
+## Authentication Workflow
+- **Anonymous Start**: App launches directly to home page with random mage name (e.g., "Merlin (Anonymous)")
+- **Immediate Play**: Users can create/join rooms instantly without any signup
+- **Optional Login**: Login prompts appear at profile section and after completing matches
+- **Account Linking**: Anonymous users can link to email/password or Google accounts
+- **Progress Transfer**: Game stats, achievements, and progress carry over when linking accounts
+- **No Auth Guards**: All app features accessible without authentication
+- **Firebase Anonymous Auth**: Uses Firebase's built-in anonymous authentication system
+- **Random Mage Names**: 60+ fantasy/pop culture mage names (Gandalf, Dumbledore, Strange, etc.)
+
 ## Room Management Workflow
 - **Instant Room Creation**: Click "Create Room" immediately creates a room with default settings (max 4 players, all ingredient sets, 30s timers)
 - **Code-Based Joining**: Each room has a unique 6-character code (letters/numbers)
@@ -157,15 +170,19 @@ The project implements secure Firebase credential management to protect sensitiv
 - **No Separate Join Page**: Streamlined UX with everything on the home page
 
 ## Important Architectural Decisions
-1. **Dynamic Rooms**: Players can join/leave games in progress
-2. **No Public Rooms**: All games are private/invitation-based (code-based)
-3. **Firebase Exclusive**: All backend services through Firebase
-4. **Simultaneous Play**: Potions phase is not turn-based
-5. **Instant Creation**: Rooms created immediately without configuration screens
-6. **Code Sharing**: Primary method of room discovery via 6-character codes
-7. **Backend XP**: Experience system tracked but no UI yet
-8. **11 Achievements**: Simple achievement system (wins + ingredients)
-9. **Friends System**: Recent players recommendations
-10. **No Monetization**: Free-to-play, no shop or purchases
-11. **No Leaderboards**: Focus on friend-based competition
-12. **Emotes Only**: No text chat, just reaction buttons
+1. **Anonymous-First**: No required login - players start as anonymous with random mage names
+2. **Optional Authentication**: Login prompts at profile and match end to save progress
+3. **Firebase Anonymous Auth**: Uses Firebase's native anonymous authentication system
+4. **Account Linking**: Anonymous users can upgrade to full accounts (email/Google)
+5. **Dynamic Rooms**: Players can join/leave games in progress
+6. **No Public Rooms**: All games are private/invitation-based (code-based)
+7. **Firebase Exclusive**: All backend services through Firebase
+8. **Simultaneous Play**: Potions phase is not turn-based
+9. **Instant Creation**: Rooms created immediately without configuration screens
+10. **Code Sharing**: Primary method of room discovery via 6-character codes
+11. **Backend XP**: Experience system tracked but no UI yet
+12. **11 Achievements**: Simple achievement system (wins + ingredients)
+13. **Friends System**: Recent players recommendations
+14. **No Monetization**: Free-to-play, no shop or purchases
+15. **No Leaderboards**: Focus on friend-based competition
+16. **Emotes Only**: No text chat, just reaction buttons
