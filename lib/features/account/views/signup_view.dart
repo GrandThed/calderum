@@ -51,6 +51,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
         initial: () {},
         loading: () {},
         authenticated: (_) => context.go('/home'),
+        anonymous: (_) => context.go('/home'),
         unauthenticated: () {},
         error: (message) {
           ScaffoldMessenger.of(context).showSnackBar(

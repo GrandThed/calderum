@@ -7,11 +7,12 @@ part 'user_model.g.dart';
 class UserModel with _$UserModel {
   const factory UserModel({
     required String uid,
-    required String email,
+    String? email,
     required String displayName,
     String? photoUrl,
     DateTime? createdAt,
     DateTime? lastLogin,
+    @Default(false) bool isAnonymous,
     @Default(0) int gamesPlayed,
     @Default(0) int gamesWon,
     @Default(0) int totalPoints,
@@ -19,4 +20,8 @@ class UserModel with _$UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
+}
+
+extension UserModelExtension on UserModel {
+  String get displayNameFormatted => isAnonymous ? '$displayName (Anonymous)' : displayName;
 }

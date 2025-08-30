@@ -158,51 +158,71 @@ class _HomeViewState extends ConsumerState<HomeView> {
               // Join Room Section
               Form(
                 key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                child: Row(
                   children: [
-                    CalderumTextField(
-                      controller: _roomCodeController,
-                      label: 'Room Code',
-                      hint: 'Enter 6-digit room code',
-                      prefixIcon: Icons.vpn_key,
-                      textCapitalization: TextCapitalization.characters,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(6),
-                        FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a room code';
-                        }
-                        if (value.length != 6) {
-                          return 'Room code must be 6 characters';
-                        }
-                        return null;
-                      },
+                    Expanded(
+                      child: CalderumTextField(
+                        controller: _roomCodeController,
+                        label: 'Room Code',
+                        hint: 'Enter 6-digit room code',
+                        prefixIcon: Icons.vpn_key,
+                        textCapitalization: TextCapitalization.characters,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(6),
+                          FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                        ],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a room code';
+                          }
+                          if (value.length != 6) {
+                            return 'Room code must be 6 characters';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: CalderumButton(
-                            text: _isJoining ? 'Joining...' : 'Join Room',
-                            onPressed: _isJoining ? null : _joinRoom,
-                            style: CalderumButtonStyle.outlined,
-                            icon: Icons.group_add,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: CalderumButton(
-                            text: 'Paste',
-                            onPressed: _pasteFromClipboard,
-                            style: CalderumButtonStyle.secondary,
-                            icon: Icons.paste,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _roomCodeController,
+                        builder: (context, value, _) {
+                          final isEmpty = value.text.isEmpty;
+                          return Material(
+                            color: isEmpty 
+                              ? Theme.of(context).colorScheme.secondary
+                              : Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Tooltip(
+                              message: isEmpty ? 'Paste room code' : 'Join room',
+                              child: InkWell(
+                                onTap: isEmpty 
+                                  ? _pasteFromClipboard 
+                                  : (_isJoining ? null : _joinRoom),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Center(
+                                child: _isJoining
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    )
+                                  : Icon(
+                                      isEmpty ? Icons.paste : Icons.arrow_forward,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),

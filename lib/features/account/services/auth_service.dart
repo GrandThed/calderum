@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user_model.dart';
+import 'package:calderum/shared/utils/anonymous_name_generator.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(FirebaseAuth.instance, FirebaseFirestore.instance);
@@ -121,17 +122,163 @@ class AuthService {
     }
   }
 
-  Future<UserModel> _createUserData(User user) async {
-    return await _retryFirestoreOperation(() async {
+  Future<UserModel> signInAnonymously() async {
+    try {
+      final credential = await _auth.signInAnonymously();
+      final user = credential.user!;
+      
+      // Generate a random mage name for anonymous users
+      final mageName = AnonymousNameGenerator.generateRandomMageName();
+      
       final userModel = UserModel(
         uid: user.uid,
-        email: user.email!,
-        displayName: user.displayName ?? '',
-        photoUrl: user.photoURL,
+        displayName: mageName,
+        isAnonymous: true,
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+      );
+      
+      // Don't save anonymous users to Firestore
+      return userModel;
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  UserModel createAnonymousUserModel(User firebaseUser) {
+    final mageName = AnonymousNameGenerator.generateRandomMageName();
+    
+    return UserModel(
+      uid: firebaseUser.uid,
+      displayName: mageName,
+      isAnonymous: true,
+      createdAt: DateTime.now(),
+      lastLogin: DateTime.now(),
+    );
+  }
+
+  Future<UserModel> linkAnonymousToEmailPassword({
+    required UserModel anonymousUser,
+    required String email,
+    required String password,
+    required String displayName,
+  }) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null || !currentUser.isAnonymous) {
+        throw 'No anonymous user to link';
+      }
+
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+
+      final userCredential = await currentUser.linkWithCredential(credential);
+      await userCredential.user!.updateDisplayName(displayName);
+
+      // Transfer anonymous user data to authenticated user
+      final authenticatedUser = UserModel(
+        uid: userCredential.user!.uid,
+        email: email,
+        displayName: displayName,
+        photoUrl: userCredential.user!.photoURL,
+        isAnonymous: false,
+        gamesPlayed: anonymousUser.gamesPlayed,
+        gamesWon: anonymousUser.gamesWon,
+        totalPoints: anonymousUser.totalPoints,
         createdAt: DateTime.now(),
         lastLogin: DateTime.now(),
       );
 
+      return await _createUserDataWithModel(userCredential.user!, authenticatedUser);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  Future<UserModel> linkAnonymousToGoogle({
+    required UserModel anonymousUser,
+  }) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null || !currentUser.isAnonymous) {
+        throw 'No anonymous user to link';
+      }
+
+      await _googleSignIn.initialize(
+        clientId: '549073578108-2rmn4e2k4jooqg3r89lda3be39aoobvs.apps.googleusercontent.com',
+        serverClientId: '549073578108-ka9hs571k3qan6mof1g5bgcrhtjsv1qh.apps.googleusercontent.com',
+      );
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
+      
+      if (googleUser == null) {
+        throw 'Google sign-in was cancelled';
+      }
+
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await currentUser.linkWithCredential(credential);
+
+      // Transfer anonymous user data to authenticated user
+      final authenticatedUser = UserModel(
+        uid: userCredential.user!.uid,
+        email: userCredential.user!.email,
+        displayName: userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
+        photoUrl: userCredential.user!.photoURL,
+        isAnonymous: false,
+        gamesPlayed: anonymousUser.gamesPlayed,
+        gamesWon: anonymousUser.gamesWon,
+        totalPoints: anonymousUser.totalPoints,
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+      );
+      
+      return await _createUserDataWithModel(userCredential.user!, authenticatedUser);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw 'Failed to link with Google: $e';
+    }
+  }
+
+  Future<UserModel> _createUserData(User user) async {
+    return await _retryFirestoreOperation(() async {
+      final userModel = UserModel(
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName ?? '',
+        photoUrl: user.photoURL,
+        isAnonymous: false,
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+      );
+
+      try {
+        await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
+        return userModel;
+      } catch (e) {
+        // If user already exists, fetch the existing data
+        if (e.toString().contains('DUPLICATE_RAW_ID') || 
+            e.toString().contains('already exists')) {
+          print('ℹ️ User document already exists, fetching existing data');
+          final doc = await _firestore.collection('users').doc(user.uid).get();
+          if (doc.exists) {
+            return UserModel.fromJson({...doc.data()!, 'uid': user.uid});
+          }
+        }
+        rethrow;
+      }
+    });
+  }
+
+  Future<UserModel> _createUserDataWithModel(User user, UserModel userModel) async {
+    return await _retryFirestoreOperation(() async {
       try {
         await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
         return userModel;
@@ -169,6 +316,7 @@ class AuthService {
       });
     });
   }
+
 
   Future<T> _retryFirestoreOperation<T>(Future<T> Function() operation) async {
     int retryCount = 0;

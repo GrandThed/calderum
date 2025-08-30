@@ -6,6 +6,7 @@ import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/profile_viewmodel.dart';
 import '../widgets/profile_avatar.dart';
 import '../widgets/profile_stat_card.dart';
+import '../widgets/anonymous_login_prompt.dart';
 
 class ProfileView extends ConsumerStatefulWidget {
   const ProfileView({super.key});
@@ -70,7 +71,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     if (confirm == true && mounted) {
       await ref.read(authViewModelProvider.notifier).signOut();
       if (mounted) {
-        context.go('/login');
+        context.go('/home');
       }
     }
   }
@@ -102,6 +103,70 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
         data: (user) {
           if (user == null) {
             return const Center(child: Text('No user data available'));
+          }
+
+          // Show login prompt for anonymous users
+          if (user.isAnonymous) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  AnonymousLoginPrompt(
+                    user: user,
+                    context: 'profile',
+                    onLoginSuccess: () {
+                      // Refresh the profile view
+                      ref.invalidate(currentUserModelProvider);
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  // Show limited stats for anonymous users
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Session Stats',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontFamily: 'Caudex',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ProfileStatCard(
+                                  label: 'Games Played',
+                                  value: user.gamesPlayed.toString(),
+                                  icon: Icons.sports_esports,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ProfileStatCard(
+                                  label: 'Games Won',
+                                  value: user.gamesWon.toString(),
+                                  icon: Icons.emoji_events,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          ProfileStatCard(
+                            label: 'Total Points',
+                            value: user.totalPoints.toString(),
+                            icon: Icons.stars,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
 
           return SingleChildScrollView(
@@ -189,7 +254,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             value: user.displayName,
                           ),
                           const SizedBox(height: 12),
-                          _InfoRow(label: 'Email', value: user.email),
+                          _InfoRow(label: 'Email', value: user.email ?? 'Not provided'),
                           if (user.createdAt != null) ...[
                             const SizedBox(height: 12),
                             _InfoRow(

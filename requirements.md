@@ -13,21 +13,27 @@ Calderum is a digital adaptation of The Quacks of Quedlinburg, a push-your-luck 
 - **FR-ONBOARD-003**: System must track onboarding completion
 - **FR-ONBOARD-004**: Onboarding must explain core game mechanics
 
-#### 1.1 Authentication
-- **FR-AUTH-001**: Users must be able to register with email and password
-- **FR-AUTH-002**: Users must be able to sign in with existing credentials
-- **FR-AUTH-003**: Users must be able to reset forgotten passwords via email
-- **FR-AUTH-004**: Users must be able to sign in with Google OAuth
-- **FR-AUTH-005**: System must maintain secure session management
-- **FR-AUTH-006**: Users must be able to sign out from any screen
+#### 1.1 Authentication (Anonymous-First Model)
+- **FR-AUTH-001**: Users must start as anonymous with random mage names (no signup required)
+- **FR-AUTH-002**: Anonymous users must access all app features without restrictions
+- **FR-AUTH-003**: Users must be able to optionally register with email and password
+- **FR-AUTH-004**: Users must be able to sign in with existing credentials
+- **FR-AUTH-005**: Users must be able to reset forgotten passwords via email
+- **FR-AUTH-006**: Users must be able to sign in with Google OAuth
+- **FR-AUTH-007**: Anonymous users must be able to link accounts (email/Google) to save progress
+- **FR-AUTH-008**: System must transfer anonymous user progress when linking accounts
+- **FR-AUTH-009**: System must maintain secure session management
+- **FR-AUTH-010**: Users must be able to sign out from any screen (returns to anonymous)
 
 #### 1.2 Profile Management
-- **FR-PROF-001**: Users must be able to set and update display name
-- **FR-PROF-002**: Users must be able to upload and change profile picture
-- **FR-PROF-003**: System must track user statistics (games played, won, points)
-- **FR-PROF-004**: Users must be able to view their game history
-- **FR-PROF-005**: Users must be able to delete their account
-- **FR-PROF-006**: System must calculate and display win rate
+- **FR-PROF-001**: Anonymous users must see random mage names with "(Anonymous)" suffix
+- **FR-PROF-002**: Anonymous users must see login prompts in profile section
+- **FR-PROF-003**: Authenticated users must be able to set and update display name
+- **FR-PROF-004**: Authenticated users must be able to upload and change profile picture
+- **FR-PROF-005**: System must track user statistics for both anonymous and authenticated users
+- **FR-PROF-006**: Users must be able to view their game history (session-based for anonymous)
+- **FR-PROF-007**: Authenticated users must be able to delete their account
+- **FR-PROF-008**: System must calculate and display win rate
 
 ### 2. Game Room Management
 
@@ -341,9 +347,10 @@ Calderum is a digital adaptation of The Quacks of Quedlinburg, a push-your-luck 
 ```
 User {
   uid: string
-  email: string
+  email: string?  // Nullable for anonymous users
   displayName: string
-  photoUrl: string
+  photoUrl: string?
+  isAnonymous: boolean  // True for anonymous users
   level: number  // Backend only for now
   experience: number  // Backend only for now
   gamesPlayed: number

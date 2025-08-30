@@ -45,6 +45,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
         initial: () {},
         loading: () {},
         authenticated: (_) => context.go('/home'),
+        anonymous: (_) => context.go('/home'),
         unauthenticated: () {},
         error: (message) {
           ScaffoldMessenger.of(context).showSnackBar(
