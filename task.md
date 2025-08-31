@@ -22,57 +22,59 @@ Completed Items:
 - ✅ Routing with go_router
 - ✅ State management with Riverpod
 
-### Phase 1: Core Game Infrastructure
+### Phase 1: Core Game Infrastructure ✅ COMPLETE
 **Duration**: 4 weeks (Sprints 1-2)
 **Goal**: Establish multiplayer foundation and room management
+**Status**: All tasks completed successfully
 
 #### Sprint 1: Room Management Backend
 **Week 1-2**
 
 ##### Backend Tasks
-- [ ] **TASK-BE-001**: Design Firestore schema for rooms
+- [x] **TASK-BE-001**: Design Firestore schema for rooms ✅
   - Collections: rooms, room_members, room_settings
   - Security rules for room access
   - Composite indexes for queries
   - Estimate: 8 hours
 
-- [ ] **TASK-BE-002**: Implement room service
+- [x] **TASK-BE-002**: Implement room service ✅
   - Create room with unique code generation
   - Join room via code validation
   - Leave room and cleanup
   - Room capacity management
+  - Duplicate room prevention
   - Estimate: 16 hours
 
-- [ ] **TASK-BE-003**: Real-time room state sync
+- [x] **TASK-BE-003**: Real-time room state sync ✅
   - Firestore real-time listeners setup
   - Room state synchronization
   - Player presence system
   - Connection state handling
   - Estimate: 12 hours
 
-- [ ] **TASK-BE-004**: Room settings management
+- [x] **TASK-BE-004**: Room settings management ✅
   - Ingredient set selection (1-4)
   - Test tube variant toggle
-  - Timer settings
-  - Room invitation system
+  - Dynamic player count (2-4)
+  - Settings dialog for hosts
   - Estimate: 8 hours
 
 ##### Frontend Tasks
-- [ ] **TASK-FE-001**: Create room model with Freezed
+- [x] **TASK-FE-001**: Create room model with Freezed ✅
   - Room data class
   - Room settings model
   - Player model for room context
   - Estimate: 4 hours
 
-- [ ] **TASK-FE-002**: Room management view models
+- [x] **TASK-FE-002**: Room management view models ✅
   - Create room view model
   - Join room view model
-  - Room list view model
+  - Room stream providers
   - Estimate: 8 hours
 
-- [ ] **TASK-FE-003**: Room creation UI
-  - Create room screen
-  - Settings configuration
+- [x] **TASK-FE-003**: Room creation UI ✅
+  - Instant room creation
+  - Settings configuration dialog
   - Room code display
   - Share functionality
   - Estimate: 12 hours
@@ -81,45 +83,49 @@ Completed Items:
 **Week 3-4**
 
 ##### Frontend Tasks
-- [ ] **TASK-FE-004**: Room lobby UI
+- [x] **TASK-FE-004**: Room lobby UI ✅
   - Player list display with online/offline status
   - Ready status indicators
-  - Emote/reaction interface
-  - Settings display
-  - Start game button
+  - Settings display and configuration
+  - Room code sharing
+  - Leave room functionality
   - Estimate: 16 hours
 
-- [ ] **TASK-FE-005**: Friend invitation system
-  - Friend list display
-  - Recent players display
-  - Send invitation flow
-  - Invitation notifications
+- [x] **TASK-FE-005**: Friend invitation system ✅
+  - Friend list display with online status
+  - Recent players display (auto-tracked from games)
+  - Send invitation flow via share integration
+  - Friend request system (send/accept/reject)
+  - User search functionality
   - Estimate: 12 hours
 
-- [ ] **TASK-FE-006**: Dynamic room management
-  - Join/rejoin room interface
-  - Show active games list
-  - Handle mid-game joins
+- [x] **TASK-FE-006**: Dynamic room management ✅
+  - Join room via code interface
+  - Paste room code functionality
+  - Auto-join on valid code
   - Player status indicators
   - Estimate: 8 hours
 
 ##### Backend Tasks
-- [ ] **TASK-BE-005**: Emote/reaction system
-  - Predefined emote set
-  - Real-time emote broadcasting
-  - Emote rate limiting
+- [x] **TASK-BE-005**: Emote/reaction system ✅
+  - Predefined emote set (10 emotes with emoji and labels)
+  - Real-time emote broadcasting via Firestore
+  - Emote rate limiting (2-second cooldown)
+  - Auto-cleanup after 5 seconds
   - Estimate: 6 hours
 
-- [ ] **TASK-BE-006**: Dynamic room persistence
+- [x] **TASK-BE-006**: Dynamic room persistence ✅
   - Maintain game state for absent players
-  - Handle rejoin logic
-  - Turn notification system
+  - Handle rejoin logic with handleReconnection()
+  - Player status tracking (online/offline)
+  - Turn notification system ready
   - Estimate: 12 hours
 
-- [ ] **TASK-BE-007**: Room lifecycle management
-  - Auto-cleanup abandoned rooms
+- [x] **TASK-BE-007**: Room lifecycle management ✅
+  - Auto-cleanup abandoned rooms (24-hour threshold)
   - Host migration on disconnect
   - Game start validation
+  - Room deletion when empty
   - Estimate: 8 hours
 
 ### Phase 2: Game Mechanics Implementation

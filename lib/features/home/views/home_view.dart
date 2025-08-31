@@ -235,8 +235,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Future<void> _createRoom() async {
-    // Create room immediately with default settings
-    ref.read(createRoomViewModelProvider.notifier).createRoom();
+    // Navigate to create room view for customization
+    context.go('/create-room');
   }
 
   Future<void> _joinRoom() async {
@@ -249,6 +249,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
       
+      // Get current user from Firestore (works for both anonymous and authenticated users)
       final currentUser = await authService.getCurrentUserModel();
       if (currentUser == null) {
         throw 'User not authenticated';

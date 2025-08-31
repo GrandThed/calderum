@@ -5,6 +5,8 @@ import '../models/room_model.dart';
 import '../viewmodels/room_viewmodel.dart';
 import '../../../shared/widgets/calderum_button.dart';
 import '../../../shared/widgets/calderum_app_bar.dart';
+import '../../../shared/utils/anonymous_name_generator.dart';
+import '../../account/services/auth_service.dart';
 
 class CreateRoomView extends ConsumerStatefulWidget {
   const CreateRoomView({super.key});
@@ -16,9 +18,24 @@ class CreateRoomView extends ConsumerStatefulWidget {
 class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
   IngredientSet _ingredientSet = IngredientSet.set1;
   bool _testTubeVariant = false;
-  int _turnTimerSeconds = 30;
-  bool _allowMidGameJoins = true;
-  bool _allowSpectators = true;
+  bool _allowMidGameJoins = false;
+  bool _allowSpectators = false;
+  String? _selectedMageName;
+  final List<String> _availableMageNames = [
+    'Gandalf', 'Merlin', 'Radagast', 'Saruman', 'Elrond',
+    'Dumbledore', 'McGonagall', 'Snape', 'Hermione', 'Voldemort',
+    'Flamel', 'Grindelwald', 'Newt', 'Hagrid',
+    'Jafar', 'Maleficent', 'Morgana', 'Prospero', 'Circe',
+    'Strange', 'Scarlet', 'Zatanna', 'Constantine', 'Fate',
+    'Loki', 'Odin', 'Thoth', 'Isis', 'Hecate', 'Medea',
+    'Raistlin', 'Elminster', 'Khadgar', 'Jaina', 'Medivh',
+    'Tyrande', 'Malfurion', 'Illidan', 'Azshara', 'Rhonin',
+    'Alaric', 'Celestine', 'Drakonis', 'Evangeline', 'Faelar',
+    'Grimjaw', 'Hexana', 'Ignatius', 'Jinx', 'Korrigan',
+    'Lunara', 'Mystral', 'Nightshade', 'Obsidian', 'Phoenix',
+    'Quicksilver', 'Raven', 'Shadowmere', 'Tempest', 'Umbra',
+    'Vex', 'Whisper', 'Xylo', 'Yggdrasil', 'Zephyr'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -108,14 +125,23 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
                           onChanged: (value) => setState(() => _testTubeVariant = value),
                         ),
                         
-                        _buildSliderSetting(
-                          label: 'Turn Timer',
-                          value: _turnTimerSeconds.toDouble(),
-                          min: 15,
-                          max: 120,
-                          divisions: 7,
-                          onChanged: (value) => setState(() => _turnTimerSeconds = value.toInt()),
-                          valueText: '$_turnTimerSeconds seconds',
+                        const SizedBox(height: 24),
+                        
+                        // Mage settings
+                        _buildSectionTitle('🧙‍♂️ Mage Settings'),
+                        const SizedBox(height: 16),
+                        
+                        _buildDropdownSetting<String?>(
+                          label: 'Mage Name',
+                          value: _selectedMageName,
+                          items: [null, ..._availableMageNames],
+                          onChanged: (value) => setState(() => _selectedMageName = value),
+                          itemBuilder: (name) {
+                            if (name == null) {
+                              return '🎲 Random Mage Name';
+                            }
+                            return '🧙‍♂️ $name';
+                          },
                         ),
                         
                         const SizedBox(height: 24),
@@ -266,13 +292,23 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
     );
   }
 
-  void _createRoom() {
+  void _createRoom() async {
+    final authService = ref.read(authServiceProvider);
+    
+    // Update mage name if selected
+    if (_selectedMageName != null) {
+      await authService.updateDisplayName(_selectedMageName!);
+    } else {
+      // Generate a random mage name if none selected
+      final randomMageName = AnonymousNameGenerator.generateRandomMageName();
+      await authService.updateDisplayName(randomMageName);
+    }
+    
     final settings = RoomSettingsModel(
       maxPlayers: 4, // Always 4 for Quacks of Quedlinburg
       minPlayers: 1, // Dynamic - players can join anytime
       ingredientSet: _ingredientSet,
       testTubeVariant: _testTubeVariant,
-      turnTimerSeconds: _turnTimerSeconds,
       allowMidGameJoins: _allowMidGameJoins,
       allowSpectators: _allowSpectators,
     );
