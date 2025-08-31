@@ -10,7 +10,7 @@ class RoomModel with _$RoomModel {
     required String code,
     required String hostId,
     required String hostName,
-    required List<RoomPlayerModel> players,
+    @JsonKey(name: 'players') required List<RoomPlayerModel> players,
     required RoomSettingsModel settings,
     required RoomStatus status,
     required DateTime createdAt,
@@ -46,9 +46,8 @@ class RoomSettingsModel with _$RoomSettingsModel {
     @Default(2) int minPlayers,
     @Default(IngredientSet.set1) IngredientSet ingredientSet,
     @Default(false) bool testTubeVariant,
-    @Default(30) int turnTimerSeconds,
-    @Default(true) bool allowMidGameJoins,
-    @Default(true) bool allowSpectators,
+    @Default(false) bool allowMidGameJoins,
+    @Default(false) bool allowSpectators,
   }) = _RoomSettingsModel;
 
   factory RoomSettingsModel.fromJson(Map<String, dynamic> json) =>

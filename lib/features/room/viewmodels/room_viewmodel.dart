@@ -20,18 +20,31 @@ class CreateRoomViewModel extends _$CreateRoomViewModel {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
       
+      print('🏠 Creating room - getting current user...');
       final currentUser = await authService.getCurrentUserModel();
+      
+      print('👤 Current user data:');
+      print('   - User: ${currentUser?.uid}');
+      print('   - Name: ${currentUser?.displayName}');
+      print('   - Email: ${currentUser?.email}');
+      print('   - Anonymous: ${currentUser?.isAnonymous}');
+      print('   - Created: ${currentUser?.createdAt}');
+      
       if (currentUser == null) {
+        print('❌ User is null - throwing authentication error');
         throw 'User not authenticated';
       }
 
+      print('✅ User found, creating room...');
       final room = await roomService.createRoom(
         host: currentUser,
         settings: settings,
       );
+      print('🎉 Room created successfully: ${room.id}');
 
       state = AsyncValue.data(room);
     } catch (e, stackTrace) {
+      print('❌ Error creating room: $e');
       state = AsyncValue.error(e, stackTrace);
     }
   }

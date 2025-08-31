@@ -7,6 +7,10 @@ import '../models/room_model.dart';
 import '../viewmodels/room_viewmodel.dart';
 import '../widgets/player_list_tile.dart';
 import '../widgets/room_settings_card.dart';
+import '../widgets/room_settings_dialog.dart';
+import '../widgets/emote_picker.dart';
+import '../widgets/emote_display.dart';
+import '../../friends/widgets/friend_invite_dialog.dart';
 import '../../account/services/auth_service.dart';
 import '../../../shared/widgets/calderum_button.dart';
 import '../../../shared/widgets/calderum_app_bar.dart';
@@ -94,6 +98,11 @@ class RoomLobbyView extends ConsumerWidget {
         title: '🏠 Room ${room.code}',
         actions: [
           IconButton(
+            icon: const Icon(Icons.group_add),
+            onPressed: () => _showInviteFriendsDialog(context, room.code),
+            tooltip: 'Invite friends',
+          ),
+          IconButton(
             icon: const Icon(Icons.share),
             onPressed: () => _shareRoom(room),
             tooltip: 'Share room code',
@@ -140,7 +149,7 @@ class RoomLobbyView extends ConsumerWidget {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               children: [
                 // Room info card
@@ -189,18 +198,12 @@ class RoomLobbyView extends ConsumerWidget {
                         ),
                         const Divider(),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             _buildInfoChip(
                               icon: Icons.people,
                               label: 'Players',
                               value: '${room.players.length}/${room.settings.maxPlayers}',
-                              theme: theme,
-                            ),
-                            _buildInfoChip(
-                              icon: Icons.timer,
-                              label: 'Timer',
-                              value: '${room.settings.turnTimerSeconds}s',
                               theme: theme,
                             ),
                             _buildInfoChip(
@@ -216,7 +219,12 @@ class RoomLobbyView extends ConsumerWidget {
                   ),
                 ),
                 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
+                
+                // Room settings
+                RoomSettingsCard(settings: room.settings),
+                
+                const SizedBox(height: 20),
                 
                 // Players list
                 Card(
@@ -253,12 +261,7 @@ class RoomLobbyView extends ConsumerWidget {
                   ),
                 ),
                 
-                const SizedBox(height: 16),
-                
-                // Room settings
-                RoomSettingsCard(settings: room.settings),
-                
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 
                 // Action buttons
                 if (currentPlayer != null) ...[
@@ -420,6 +423,13 @@ class RoomLobbyView extends ConsumerWidget {
     );
   }
 
+  void _showInviteFriendsDialog(BuildContext context, String roomCode) {
+    showDialog(
+      context: context,
+      builder: (context) => FriendInviteDialog(roomCode: roomCode),
+    );
+  }
+
   void _copyRoomCode(BuildContext context, String code) {
     Clipboard.setData(ClipboardData(text: code));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -452,9 +462,22 @@ class RoomLobbyView extends ConsumerWidget {
   }
 
   void _showSettingsDialog(BuildContext context, WidgetRef ref, RoomModel room) {
-    // TODO: Implement settings dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Room settings coming soon!')),
+    // Only allow settings changes in waiting state
+    if (room.status != RoomStatus.waiting) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Settings can only be changed while waiting for players'),
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => RoomSettingsDialog(
+        roomId: room.id,
+        currentSettings: room.settings,
+      ),
     );
   }
 

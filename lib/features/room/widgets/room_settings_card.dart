@@ -38,63 +38,41 @@ class RoomSettingsCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             
-            // Game settings grid
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              childAspectRatio: 3,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 12,
-              children: [
-                _buildSettingTile(
-                  icon: Icons.people,
-                  label: 'Players',
-                  value: '${settings.minPlayers}-${settings.maxPlayers}',
-                  theme: theme,
-                ),
-                _buildSettingTile(
-                  icon: Icons.timer,
-                  label: 'Turn Timer',
-                  value: '${settings.turnTimerSeconds}s',
-                  theme: theme,
-                ),
-                _buildSettingTile(
-                  icon: _getIngredientSetIcon(settings.ingredientSet),
-                  label: 'Ingredient Set',
-                  value: _getIngredientSetName(settings.ingredientSet),
-                  theme: theme,
-                ),
-                _buildSettingTile(
-                  icon: Icons.science,
-                  label: 'Test Tube',
-                  value: settings.testTubeVariant ? 'On' : 'Off',
-                  theme: theme,
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 12),
-            
-            // Additional settings
+            // Game settings - using flexible layout instead of fixed grid
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 12,
+              runSpacing: 12,
               children: [
-                if (settings.allowMidGameJoins)
-                  _buildSettingChip(
-                    icon: Icons.login,
-                    label: 'Mid-Game Joins',
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width - 80) / 2, // Account for padding and spacing
+                  child: _buildSettingTile(
+                    icon: Icons.people,
+                    label: 'Players',
+                    value: '${settings.minPlayers}-${settings.maxPlayers}',
                     theme: theme,
                   ),
-                if (settings.allowSpectators)
-                  _buildSettingChip(
-                    icon: Icons.visibility,
-                    label: 'Spectators',
+                ),
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width - 80) / 2,
+                  child: _buildSettingTile(
+                    icon: _getIngredientSetIcon(settings.ingredientSet),
+                    label: 'Ingredient Set',
+                    value: _getIngredientSetName(settings.ingredientSet),
                     theme: theme,
                   ),
+                ),
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width - 80) / 2,
+                  child: _buildSettingTile(
+                    icon: Icons.science,
+                    label: 'Test Tube',
+                    value: settings.testTubeVariant ? 'On' : 'Off',
+                    theme: theme,
+                  ),
+                ),
               ],
             ),
+            
           ],
         ),
       ),
