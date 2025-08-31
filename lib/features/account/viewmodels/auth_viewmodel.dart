@@ -16,32 +16,47 @@ class AuthViewModel extends _$AuthViewModel {
     _authService = ref.watch(authServiceProvider);
 
     ref.listen(authStateStreamProvider, (previous, next) {
+      print('🔄 Auth state stream update received');
       next.when(
         data: (user) async {
+          print('📊 Auth stream data: user=${user?.uid}, isAnonymous=${user?.isAnonymous}');
           if (user != null) {
             if (user.isAnonymous) {
-              // Create anonymous user model
-              final anonymousUser = _authService.createAnonymousUserModel(user);
+              print('🧙 Processing anonymous user from stream');
+              // Create/retrieve anonymous user model from Firestore
+              final anonymousUser = await _authService.createAnonymousUserModel(user);
               state = AuthState.anonymous(anonymousUser);
+              print('✅ Set state to anonymous');
             } else {
+              print('🔐 Processing authenticated user from stream');
               // Get authenticated user from Firestore
               final userModel = await _authService.getCurrentUserModel();
               if (userModel != null) {
                 state = AuthState.authenticated(userModel);
+                print('✅ Set state to authenticated');
               }
             }
           } else {
+            print('❓ No user found in stream, signing in anonymously...');
             // Sign in anonymously automatically
             try {
               final anonymousUser = await _authService.signInAnonymously();
               state = AuthState.anonymous(anonymousUser);
+              print('✅ Auto anonymous sign-in successful');
             } catch (e) {
+              print('❌ Auto anonymous sign-in failed: $e');
               state = AuthState.error(e.toString());
             }
           }
         },
-        loading: () => state = const AuthState.loading(),
-        error: (error, _) => state = AuthState.error(error.toString()),
+        loading: () {
+          print('⏳ Auth state stream loading');
+          state = const AuthState.loading();
+        },
+        error: (error, _) {
+          print('❌ Auth state stream error: $error');
+          state = AuthState.error(error.toString());
+        },
       );
     });
 

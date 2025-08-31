@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options_secure.dart';
 import 'router/app_router.dart';
 import 'shared/theme/app_theme.dart';
+import 'features/account/viewmodels/auth_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment vDTDariables
+  // Load environment variables
   await dotenv.load(fileName: ".env");
 
   // Initialize Firebase with secure options
@@ -24,6 +25,10 @@ class CalderumApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    
+    // Initialize auth state by watching the AuthViewModel
+    final authState = ref.watch(authViewModelProvider);
+    print('🏁 App build - Auth state: ${authState.runtimeType}');
 
     return MaterialApp.router(
       title: 'Calderum - Hot Reload Test!',

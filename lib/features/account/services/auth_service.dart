@@ -21,13 +21,32 @@ class AuthService {
   User? get currentUser => _auth.currentUser;
 
   Future<UserModel?> getCurrentUserModel() async {
+    print('🔍 Getting current user model...');
     final user = currentUser;
-    if (user == null) return null;
+    print('   - Firebase Auth User: ${user?.uid}');
+    print('   - Is Anonymous: ${user?.isAnonymous}');
+    
+    if (user == null) {
+      print('❌ No Firebase auth user found');
+      return null;
+    }
 
+    print('📄 Fetching user document from Firestore...');
     final doc = await _firestore.collection('users').doc(user.uid).get();
-    if (!doc.exists) return null;
+    print('   - Document exists: ${doc.exists}');
+    
+    if (!doc.exists) {
+      print('❌ User document not found in Firestore');
+      return null;
+    }
 
-    return UserModel.fromJson({...doc.data()!, 'uid': user.uid});
+    final userData = doc.data()!;
+    print('✅ User document found:');
+    print('   - Name: ${userData['displayName']}');
+    print('   - Email: ${userData['email']}');
+    print('   - Anonymous: ${userData['isAnonymous']}');
+
+    return UserModel.fromJson({...userData, 'uid': user.uid});
   }
 
   Future<UserModel> signInWithEmailAndPassword({
@@ -114,6 +133,18 @@ class AuthService {
     await _googleSignIn.signOut();
   }
 
+  Future<void> updateDisplayName(String displayName) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      await currentUser.updateDisplayName(displayName);
+      
+      // Update Firestore document
+      await _firestore.collection('users').doc(currentUser.uid).update({
+        'displayName': displayName,
+      });
+    }
+  }
+
   Future<void> resetPassword(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -124,37 +155,101 @@ class AuthService {
 
   Future<UserModel> signInAnonymously() async {
     try {
+      print('🔍 Starting anonymous sign-in...');
       final credential = await _auth.signInAnonymously();
       final user = credential.user!;
+      print('✅ Anonymous sign-in successful: ${user.uid}');
       
-      // Generate a random mage name for anonymous users
+      // Check if anonymous user already exists in Firestore
+      print('📄 Checking if user exists in Firestore...');
+      final existingDoc = await _firestore.collection('users').doc(user.uid).get();
+      print('   - Document exists: ${existingDoc.exists}');
+      
+      if (existingDoc.exists) {
+        print('♻️ Updating existing anonymous user');
+        // Update last login for existing anonymous user
+        await _firestore.collection('users').doc(user.uid).update({
+          'lastLogin': DateTime.now().toIso8601String(),
+        });
+        
+        return UserModel.fromJson({
+          ...existingDoc.data()!,
+          'uid': user.uid,
+          'lastLogin': DateTime.now().toIso8601String(),
+        });
+      } else {
+        print('🆕 Creating new anonymous user');
+        // Generate a random mage name for new anonymous users
+        final mageName = AnonymousNameGenerator.generateRandomMageName();
+        print('🧙 Generated mage name: $mageName');
+        
+        final userModel = UserModel(
+          uid: user.uid,
+          displayName: mageName,
+          isAnonymous: true,
+          createdAt: DateTime.now(),
+          lastLogin: DateTime.now(),
+        );
+        
+        // Save anonymous user to Firestore
+        print('💾 Saving anonymous user to Firestore...');
+        await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
+        print('✅ Anonymous user saved successfully');
+        
+        return userModel;
+      }
+    } on FirebaseAuthException catch (e) {
+      print('❌ Firebase Auth Error: ${e.code} - ${e.message}');
+      throw _handleAuthException(e);
+    } catch (e) {
+      print('❌ General Error in anonymous sign-in: $e');
+      throw 'Failed to sign in anonymously: $e';
+    }
+  }
+
+  Future<UserModel> createAnonymousUserModel(User firebaseUser) async {
+    try {
+      // Check if anonymous user already exists in Firestore
+      final existingDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      
+      if (existingDoc.exists) {
+        // Update last login for existing anonymous user
+        await _firestore.collection('users').doc(firebaseUser.uid).update({
+          'lastLogin': DateTime.now().toIso8601String(),
+        });
+        
+        return UserModel.fromJson({
+          ...existingDoc.data()!,
+          'uid': firebaseUser.uid,
+          'lastLogin': DateTime.now().toIso8601String(),
+        });
+      } else {
+        final mageName = AnonymousNameGenerator.generateRandomMageName();
+        
+        final userModel = UserModel(
+          uid: firebaseUser.uid,
+          displayName: mageName,
+          isAnonymous: true,
+          createdAt: DateTime.now(),
+          lastLogin: DateTime.now(),
+        );
+        
+        // Save anonymous user to Firestore
+        await _firestore.collection('users').doc(firebaseUser.uid).set(userModel.toJson());
+        
+        return userModel;
+      }
+    } catch (e) {
+      // Fallback to in-memory model if Firestore fails
       final mageName = AnonymousNameGenerator.generateRandomMageName();
-      
-      final userModel = UserModel(
-        uid: user.uid,
+      return UserModel(
+        uid: firebaseUser.uid,
         displayName: mageName,
         isAnonymous: true,
         createdAt: DateTime.now(),
         lastLogin: DateTime.now(),
       );
-      
-      // Don't save anonymous users to Firestore
-      return userModel;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
     }
-  }
-
-  UserModel createAnonymousUserModel(User firebaseUser) {
-    final mageName = AnonymousNameGenerator.generateRandomMageName();
-    
-    return UserModel(
-      uid: firebaseUser.uid,
-      displayName: mageName,
-      isAnonymous: true,
-      createdAt: DateTime.now(),
-      lastLogin: DateTime.now(),
-    );
   }
 
   Future<UserModel> linkAnonymousToEmailPassword({
@@ -174,26 +269,38 @@ class AuthService {
         password: password,
       );
 
+      // Link the anonymous account with email/password credential
       final userCredential = await currentUser.linkWithCredential(credential);
       await userCredential.user!.updateDisplayName(displayName);
 
-      // Transfer anonymous user data to authenticated user
+      // Create authenticated user model preserving all anonymous user data
       final authenticatedUser = UserModel(
-        uid: userCredential.user!.uid,
+        uid: userCredential.user!.uid, // Same UID as anonymous user
         email: email,
         displayName: displayName,
         photoUrl: userCredential.user!.photoURL,
-        isAnonymous: false,
+        isAnonymous: false, // Now authenticated
         gamesPlayed: anonymousUser.gamesPlayed,
         gamesWon: anonymousUser.gamesWon,
         totalPoints: anonymousUser.totalPoints,
-        createdAt: DateTime.now(),
+        createdAt: anonymousUser.createdAt, // Preserve original creation date
         lastLogin: DateTime.now(),
       );
 
-      return await _createUserDataWithModel(userCredential.user!, authenticatedUser);
+      // Update the existing Firestore document (same UID, just change isAnonymous and add auth data)
+      await _firestore.collection('users').doc(userCredential.user!.uid).update({
+        'email': email,
+        'displayName': displayName,
+        'photoUrl': userCredential.user!.photoURL,
+        'isAnonymous': false,
+        'lastLogin': DateTime.now().toIso8601String(),
+      });
+
+      return authenticatedUser;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
+    } catch (e) {
+      throw 'Failed to link anonymous account to email/password: $e';
     }
   }
 
@@ -223,23 +330,33 @@ class AuthService {
         idToken: googleAuth.idToken,
       );
 
+      // Link the anonymous account with Google credential
       final userCredential = await currentUser.linkWithCredential(credential);
 
-      // Transfer anonymous user data to authenticated user
+      // Create authenticated user model preserving all anonymous user data
       final authenticatedUser = UserModel(
-        uid: userCredential.user!.uid,
+        uid: userCredential.user!.uid, // Same UID as anonymous user
         email: userCredential.user!.email,
         displayName: userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
         photoUrl: userCredential.user!.photoURL,
-        isAnonymous: false,
+        isAnonymous: false, // Now authenticated
         gamesPlayed: anonymousUser.gamesPlayed,
         gamesWon: anonymousUser.gamesWon,
         totalPoints: anonymousUser.totalPoints,
-        createdAt: DateTime.now(),
+        createdAt: anonymousUser.createdAt, // Preserve original creation date
         lastLogin: DateTime.now(),
       );
       
-      return await _createUserDataWithModel(userCredential.user!, authenticatedUser);
+      // Update the existing Firestore document (same UID, just change isAnonymous and add auth data)
+      await _firestore.collection('users').doc(userCredential.user!.uid).update({
+        'email': userCredential.user!.email,
+        'displayName': userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
+        'photoUrl': userCredential.user!.photoURL,
+        'isAnonymous': false,
+        'lastLogin': DateTime.now().toIso8601String(),
+      });
+
+      return authenticatedUser;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
