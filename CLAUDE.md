@@ -58,12 +58,12 @@ Phase 0 (Foundation) and Phase 1 (Room Management) are complete. See `task.md` f
 - ✅ **Random mage names** for anonymous users (e.g., "Gandalf (Anonymous)")
 - ✅ **Login prompts** at profile and match end to save progress
 - ✅ **Account linking** - Anonymous users can link to email/Google accounts
-- ✅ Room management system with instant creation and code-based joining
+- ✅ **Instant room creation** - Click "Create Room" immediately creates a room with default settings
+- ✅ **In-lobby settings** - Host can modify room settings from the lobby view (no separate configuration screen)
 - ✅ Streamlined home page with direct room code input and paste functionality
-- ✅ Dynamic room capacity (2-4 players configurable by host)
+- ✅ Dynamic room capacity (2-4 players configurable by host in lobby)
 - ✅ **Duplicate room prevention** - Returns existing waiting room if user already has one
-- ✅ **Configurable room settings** - Host can modify settings while room is waiting
-- ✅ **Room settings dialog** - Max players, ingredient set, test tube variant
+- ✅ **Room settings dialog** - Max players, ingredient set, test tube variant (accessible from lobby)
 - Using Riverpod for state management
 - Custom UI components with magical theme (Caudex and Caveat fonts)
 - Simple geometric ingredient icons for accessibility
@@ -174,8 +174,8 @@ The project implements secure Firebase credential management to protect sensitiv
 - **Auto-Join**: Pasting a valid 6-character code automatically attempts to join
 - **Dynamic Capacity**: Rooms support 2-4 players (configurable by host)
 - **No Separate Join Page**: Streamlined UX with everything on the home page
-- **Room Settings**: Host can configure max players (2-4), ingredient set (1-4), and test tube variant
-- **Settings Dialog**: Available in room lobby for hosts while room status is "waiting"
+- **Room Settings**: Host can configure max players (2-4), ingredient set (1-4), and test tube variant from lobby
+- **Settings Dialog**: Available in room lobby for hosts while room status is "waiting" (no separate creation screen)
 - **Real-time Updates**: All players see setting changes immediately via Firestore streams
 
 ## Important Architectural Decisions

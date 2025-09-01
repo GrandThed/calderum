@@ -35,10 +35,24 @@ class CreateRoomViewModel extends _$CreateRoomViewModel {
         throw 'User not authenticated';
       }
 
-      print('✅ User found, creating room...');
+      // Use default settings if none provided (instant room creation)
+      final roomSettings = settings ?? const RoomSettingsModel(
+        maxPlayers: 4,
+        minPlayers: 1,
+        ingredientSet: IngredientSet.set1,
+        testTubeVariant: false,
+        allowMidGameJoins: false,
+        allowSpectators: false,
+      );
+
+      print('✅ User found, creating room with settings:');
+      print('   - Max Players: ${roomSettings.maxPlayers}');
+      print('   - Ingredient Set: ${roomSettings.ingredientSet}');
+      print('   - Test Tube: ${roomSettings.testTubeVariant}');
+      
       final room = await roomService.createRoom(
         host: currentUser,
-        settings: settings,
+        settings: roomSettings,
       );
       print('🎉 Room created successfully: ${room.id}');
 

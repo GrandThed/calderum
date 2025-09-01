@@ -9,6 +9,7 @@ import '../../../shared/widgets/calderum_text_field.dart';
 import '../../../shared/constants/route_paths.dart';
 import '../../room/viewmodels/room_viewmodel.dart';
 import '../../room/services/room_service.dart';
+import '../../room/models/room_model.dart';
 import '../../account/services/auth_service.dart';
 
 class HomeView extends ConsumerStatefulWidget {
@@ -32,6 +33,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
   @override
   Widget build(BuildContext context) {
     final createRoomState = ref.watch(createRoomViewModelProvider);
+    final currentUser = ref.watch(authServiceProvider).currentUser;
+    final userRoomsAsync = currentUser != null 
+        ? ref.watch(userRoomsStreamProvider(currentUser.uid))
+        : const AsyncValue<List<RoomModel>>.data([]);
 
     // Listen for successful room creation
     ref.listen(createRoomViewModelProvider, (previous, next) {
@@ -67,12 +72,45 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // User's Active Rooms Section
+              userRoomsAsync.when(
+                data: (rooms) {
+                  final activeRooms = rooms.where((room) => 
+                    room.status == RoomStatus.waiting || 
+                    room.status == RoomStatus.inProgress
+                  ).toList();
+                  
+                  if (activeRooms.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Your Active Rooms',
+                        style: AppTheme.titleStyle.copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 12),
+                      ...activeRooms.map((room) => _buildRoomCard(room)),
+                      const SizedBox(height: 24),
+                      Divider(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        thickness: 1,
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
+              
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
@@ -235,8 +273,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Future<void> _createRoom() async {
-    // Navigate to create room view for customization
-    context.go('/create-room');
+    // Create room instantly with default settings
+    ref.read(createRoomViewModelProvider.notifier).createRoom();
   }
 
   Future<void> _joinRoom() async {
@@ -329,5 +367,119 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
       );
     }
+  }
+
+  Widget _buildRoomCard(RoomModel room) {
+    final isHost = room.hostId == ref.read(authServiceProvider).currentUser?.uid;
+    final playerCount = room.players.length;
+    final maxPlayers = room.settings.maxPlayers;
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      color: AppTheme.surfaceColor.withValues(alpha: 0.8),
+      child: InkWell(
+        onTap: () => context.go('/room/${room.id}'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: room.status == RoomStatus.waiting
+                      ? Colors.orange.withValues(alpha: 0.2)
+                      : Colors.green.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  room.status == RoomStatus.waiting
+                      ? Icons.hourglass_empty
+                      : Icons.play_arrow,
+                  color: room.status == RoomStatus.waiting
+                      ? Colors.orange
+                      : Colors.green,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Room ${room.code}',
+                          style: AppTheme.bodyStyle.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        if (isHost) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'HOST',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      room.status == RoomStatus.waiting
+                          ? 'Waiting for players'
+                          : 'Game in progress',
+                      style: AppTheme.bodyStyle.copyWith(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                children: [
+                  Icon(
+                    Icons.people,
+                    color: Colors.white54,
+                    size: 20,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$playerCount/$maxPlayers',
+                    style: AppTheme.bodyStyle.copyWith(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white54,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
