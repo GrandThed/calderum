@@ -45,7 +45,7 @@ class AuthFormField extends StatelessWidget {
         ),
         hintStyle: TextStyle(
           fontFamily: 'Caveat',
-          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
         ),
         filled: true,
         fillColor: theme.colorScheme.surfaceContainerLowest,
@@ -56,7 +56,7 @@ class AuthFormField extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: theme.colorScheme.outline.withOpacity(0.5),
+            color: theme.colorScheme.outline.withValues(alpha: 0.5),
           ),
         ),
         focusedBorder: OutlineInputBorder(

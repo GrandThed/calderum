@@ -59,19 +59,19 @@ class CalderumTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+        labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: AppTheme.surfaceColor.withOpacity(0.5),
+        fillColor: AppTheme.surfaceColor.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.5)),
+          borderSide: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.5)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.5)),
+          borderSide: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.5)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -88,7 +88,7 @@ class CalderumTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppTheme.errorColor, width: 2),
         ),
-        counterStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+        counterStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
       ),
     );
   }

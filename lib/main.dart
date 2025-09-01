@@ -27,8 +27,7 @@ class CalderumApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     
     // Initialize auth state by watching the AuthViewModel
-    final authState = ref.watch(authViewModelProvider);
-    print('🏁 App build - Auth state: ${authState.runtimeType}');
+    ref.watch(authViewModelProvider);
 
     return MaterialApp.router(
       title: 'Calderum - Hot Reload Test!',

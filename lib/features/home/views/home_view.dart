@@ -108,7 +108,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   );
                 },
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               ),
               
               Container(
@@ -153,7 +153,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   onPressed: null, // Disabled while loading
                   icon: Icons.add_circle_outline,
                 ),
-                error: (_, __) => CalderumButton(
+                error: (_, _) => CalderumButton(
                   text: 'Create Room',
                   onPressed: _createRoom,
                   icon: Icons.add_circle_outline,
@@ -331,41 +331,49 @@ class _HomeViewState extends ConsumerState<HomeView> {
           _roomCodeController.text = cleanedText;
           
           // Show feedback
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Room code pasted: $cleanedText'),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Room code pasted: $cleanedText'),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
           
           // Auto-join if code is 6 characters
           if (cleanedText.length == 6) {
             _joinRoom();
           }
         } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Invalid room code format'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Invalid room code format'),
+              content: Text('No text found in clipboard'),
               duration: Duration(seconds: 2),
             ),
           );
         }
-      } else {
+      }
+    } catch (error) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No text found in clipboard'),
+            content: Text('Failed to paste from clipboard'),
             duration: Duration(seconds: 2),
           ),
         );
       }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to paste from clipboard'),
-          duration: Duration(seconds: 2),
-        ),
-      );
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/friend_model.dart';
 import '../services/friends_service.dart';
 import '../../account/models/user_model.dart';
@@ -97,25 +98,25 @@ class UserSearch extends _$UserSearch {
 }
 
 @riverpod
-Stream<List<FriendModel>> friendsStream(FriendsStreamRef ref, String userId) {
+Stream<List<FriendModel>> friendsStream(Ref ref, String userId) {
   final friendsService = ref.watch(friendsServiceProvider);
   return friendsService.streamFriends(userId);
 }
 
 @riverpod
-Stream<List<FriendRequestModel>> incomingRequestsStream(IncomingRequestsStreamRef ref, String userId) {
+Stream<List<FriendRequestModel>> incomingRequestsStream(Ref ref, String userId) {
   final friendsService = ref.watch(friendsServiceProvider);
   return friendsService.streamIncomingRequests(userId);
 }
 
 @riverpod
-Stream<List<FriendRequestModel>> outgoingRequestsStream(OutgoingRequestsStreamRef ref, String userId) {
+Stream<List<FriendRequestModel>> outgoingRequestsStream(Ref ref, String userId) {
   final friendsService = ref.watch(friendsServiceProvider);
   return friendsService.streamOutgoingRequests(userId);
 }
 
 @riverpod
-Stream<List<RecentPlayerModel>> recentPlayersStream(RecentPlayersStreamRef ref, String userId) {
+Stream<List<RecentPlayerModel>> recentPlayersStream(Ref ref, String userId) {
   final friendsService = ref.watch(friendsServiceProvider);
   return friendsService.streamRecentPlayers(userId);
 }

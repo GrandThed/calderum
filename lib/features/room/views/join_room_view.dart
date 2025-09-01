@@ -147,7 +147,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                             ),
                           ),
                           loading: () => const CircularProgressIndicator(),
-                          error: (_, __) => SizedBox(
+                          error: (_, _) => SizedBox(
                             width: double.infinity,
                             child: CalderumButton(
                               text: '🚀 Join Room',

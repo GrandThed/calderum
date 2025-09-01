@@ -44,7 +44,7 @@ class CalderumAppBar extends StatelessWidget implements PreferredSizeWidget {
             gradient: LinearGradient(
               colors: [
                 Colors.transparent,
-                AppTheme.primaryColor.withOpacity(0.3),
+                AppTheme.primaryColor.withValues(alpha: 0.3),
                 Colors.transparent,
               ],
             ),

@@ -125,27 +125,6 @@ class RoomSettingsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingChip({
-    required IconData icon,
-    required String label,
-    required ThemeData theme,
-  }) {
-    return Chip(
-      avatar: Icon(
-        icon,
-        size: 16,
-        color: theme.colorScheme.onSecondaryContainer,
-      ),
-      label: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          color: theme.colorScheme.onSecondaryContainer,
-        ),
-      ),
-      backgroundColor: theme.colorScheme.secondaryContainer,
-    );
-  }
 
   IconData _getIngredientSetIcon(IngredientSet set) {
     switch (set) {

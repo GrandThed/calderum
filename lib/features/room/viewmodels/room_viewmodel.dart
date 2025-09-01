@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/room_model.dart';
 import '../services/room_service.dart';
-import '../../account/models/user_model.dart';
 import '../../account/services/auth_service.dart';
 
 part 'room_viewmodel.g.dart';
@@ -20,18 +20,9 @@ class CreateRoomViewModel extends _$CreateRoomViewModel {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
       
-      print('🏠 Creating room - getting current user...');
       final currentUser = await authService.getCurrentUserModel();
       
-      print('👤 Current user data:');
-      print('   - User: ${currentUser?.uid}');
-      print('   - Name: ${currentUser?.displayName}');
-      print('   - Email: ${currentUser?.email}');
-      print('   - Anonymous: ${currentUser?.isAnonymous}');
-      print('   - Created: ${currentUser?.createdAt}');
-      
       if (currentUser == null) {
-        print('❌ User is null - throwing authentication error');
         throw 'User not authenticated';
       }
 
@@ -45,20 +36,13 @@ class CreateRoomViewModel extends _$CreateRoomViewModel {
         allowSpectators: false,
       );
 
-      print('✅ User found, creating room with settings:');
-      print('   - Max Players: ${roomSettings.maxPlayers}');
-      print('   - Ingredient Set: ${roomSettings.ingredientSet}');
-      print('   - Test Tube: ${roomSettings.testTubeVariant}');
-      
       final room = await roomService.createRoom(
         host: currentUser,
         settings: roomSettings,
       );
-      print('🎉 Room created successfully: ${room.id}');
 
       state = AsyncValue.data(room);
     } catch (e, stackTrace) {
-      print('❌ Error creating room: $e');
       state = AsyncValue.error(e, stackTrace);
     }
   }
@@ -96,13 +80,13 @@ class JoinRoomViewModel extends _$JoinRoomViewModel {
 }
 
 @riverpod
-Stream<RoomModel> roomStream(RoomStreamRef ref, String roomId) {
+Stream<RoomModel> roomStream(Ref ref, String roomId) {
   final roomService = ref.watch(roomServiceProvider);
   return roomService.streamRoom(roomId);
 }
 
 @riverpod
-Stream<List<RoomModel>> userRoomsStream(UserRoomsStreamRef ref, String userId) {
+Stream<List<RoomModel>> userRoomsStream(Ref ref, String userId) {
   final roomService = ref.watch(roomServiceProvider);
   return roomService.streamUserRooms(userId);
 }

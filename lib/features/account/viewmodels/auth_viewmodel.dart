@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/auth_state.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
@@ -16,45 +16,34 @@ class AuthViewModel extends _$AuthViewModel {
     _authService = ref.watch(authServiceProvider);
 
     ref.listen(authStateStreamProvider, (previous, next) {
-      print('🔄 Auth state stream update received');
       next.when(
         data: (user) async {
-          print('📊 Auth stream data: user=${user?.uid}, isAnonymous=${user?.isAnonymous}');
           if (user != null) {
             if (user.isAnonymous) {
-              print('🧙 Processing anonymous user from stream');
               // Create/retrieve anonymous user model from Firestore
               final anonymousUser = await _authService.createAnonymousUserModel(user);
               state = AuthState.anonymous(anonymousUser);
-              print('✅ Set state to anonymous');
             } else {
-              print('🔐 Processing authenticated user from stream');
               // Get authenticated user from Firestore
               final userModel = await _authService.getCurrentUserModel();
               if (userModel != null) {
                 state = AuthState.authenticated(userModel);
-                print('✅ Set state to authenticated');
               }
             }
           } else {
-            print('❓ No user found in stream, signing in anonymously...');
             // Sign in anonymously automatically
             try {
               final anonymousUser = await _authService.signInAnonymously();
               state = AuthState.anonymous(anonymousUser);
-              print('✅ Auto anonymous sign-in successful');
             } catch (e) {
-              print('❌ Auto anonymous sign-in failed: $e');
               state = AuthState.error(e.toString());
             }
           }
         },
         loading: () {
-          print('⏳ Auth state stream loading');
           state = const AuthState.loading();
         },
         error: (error, _) {
-          print('❌ Auth state stream error: $error');
           state = AuthState.error(error.toString());
         },
       );
@@ -221,13 +210,13 @@ class AuthViewModel extends _$AuthViewModel {
 }
 
 @riverpod
-Stream<User?> authStateStream(AuthStateStreamRef ref) {
+Stream<User?> authStateStream(Ref ref) {
   final authService = ref.watch(authServiceProvider);
   return authService.authStateChanges;
 }
 
 @riverpod
-Future<UserModel?> currentUserModel(CurrentUserModelRef ref) async {
+Future<UserModel?> currentUserModel(Ref ref) async {
   final authService = ref.watch(authServiceProvider);
   return await authService.getCurrentUserModel();
 }

@@ -360,6 +360,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
                 TextButton(
                   onPressed: () async {
+                    // Store context and navigator
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                    
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
@@ -386,11 +389,13 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         ],
                       ),
                     );
+                    
+                    // Check mounted after async gap
+                    if (!mounted) return;
 
                     if (confirm == true) {
                       // TODO: Implement account deletion
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      scaffoldMessenger.showSnackBar(
                         const SnackBar(
                           content: Text('Account deletion feature coming soon'),
                         ),

@@ -34,7 +34,7 @@ class _SplashViewState extends ConsumerState<SplashView> {
           }
         },
         loading: () {},
-        error: (_, __) => context.go(RoutePaths.login),
+        error: (_, _) => context.go(RoutePaths.login),
       );
     }
   }

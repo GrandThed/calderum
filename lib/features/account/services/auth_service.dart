@@ -21,30 +21,19 @@ class AuthService {
   User? get currentUser => _auth.currentUser;
 
   Future<UserModel?> getCurrentUserModel() async {
-    print('🔍 Getting current user model...');
     final user = currentUser;
-    print('   - Firebase Auth User: ${user?.uid}');
-    print('   - Is Anonymous: ${user?.isAnonymous}');
-    
+
     if (user == null) {
-      print('❌ No Firebase auth user found');
       return null;
     }
 
-    print('📄 Fetching user document from Firestore...');
     final doc = await _firestore.collection('users').doc(user.uid).get();
-    print('   - Document exists: ${doc.exists}');
-    
+
     if (!doc.exists) {
-      print('❌ User document not found in Firestore');
       return null;
     }
 
     final userData = doc.data()!;
-    print('✅ User document found:');
-    print('   - Name: ${userData['displayName']}');
-    print('   - Email: ${userData['email']}');
-    print('   - Anonymous: ${userData['isAnonymous']}');
 
     return UserModel.fromJson({...userData, 'uid': user.uid});
   }
@@ -86,44 +75,36 @@ class AuthService {
 
   Future<UserModel> signInWithGoogle() async {
     try {
-      print('🔍 Starting Google Sign-In process...');
-      
       // Initialize Google Sign-In with proper configuration
       await _googleSignIn.initialize(
-        clientId: '549073578108-2rmn4e2k4jooqg3r89lda3be39aoobvs.apps.googleusercontent.com',
-        serverClientId: '549073578108-ka9hs571k3qan6mof1g5bgcrhtjsv1qh.apps.googleusercontent.com',
+        clientId:
+            '549073578108-2rmn4e2k4jooqg3r89lda3be39aoobvs.apps.googleusercontent.com',
+        serverClientId:
+            '549073578108-ka9hs571k3qan6mof1g5bgcrhtjsv1qh.apps.googleusercontent.com',
       );
-      print('✅ Google Sign-In initialized');
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
-      print('👤 Google user authenticated: ${googleUser?.email}');
+      // ignore: unnecessary_nullable_for_final_variable_declarations
+      final GoogleSignInAccount? googleUser = await _googleSignIn
+          .authenticate();
 
       if (googleUser == null) {
         throw 'Google sign-in was cancelled';
       }
 
-      final GoogleSignInAuthentication googleAuth = 
-          googleUser.authentication;
-      print('🔑 Got authentication token');
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
-      print('🎫 Created Firebase credential');
 
       final userCredential = await _auth.signInWithCredential(credential);
-      print('🔥 Signed in to Firebase: ${userCredential.user?.uid}');
 
       final userModel = await _updateUserData(userCredential.user!);
-      print('💾 User data updated successfully');
-      
+
       return userModel;
     } on FirebaseAuthException catch (e) {
-      print('❌ Firebase Auth Error: ${e.code} - ${e.message}');
       throw _handleAuthException(e);
-    } catch (e, stackTrace) {
-      print('❌ General Error: $e');
-      print('📍 Stack Trace: $stackTrace');
+    } catch (e) {
       throw 'Failed to sign in with Google: $e';
     }
   }
@@ -137,7 +118,7 @@ class AuthService {
     final currentUser = _auth.currentUser;
     if (currentUser != null) {
       await currentUser.updateDisplayName(displayName);
-      
+
       // Update Firestore document
       await _firestore.collection('users').doc(currentUser.uid).update({
         'displayName': displayName,
@@ -155,34 +136,30 @@ class AuthService {
 
   Future<UserModel> signInAnonymously() async {
     try {
-      print('🔍 Starting anonymous sign-in...');
       final credential = await _auth.signInAnonymously();
       final user = credential.user!;
-      print('✅ Anonymous sign-in successful: ${user.uid}');
-      
+
       // Check if anonymous user already exists in Firestore
-      print('📄 Checking if user exists in Firestore...');
-      final existingDoc = await _firestore.collection('users').doc(user.uid).get();
-      print('   - Document exists: ${existingDoc.exists}');
-      
+      final existingDoc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
       if (existingDoc.exists) {
-        print('♻️ Updating existing anonymous user');
         // Update last login for existing anonymous user
         await _firestore.collection('users').doc(user.uid).update({
           'lastLogin': DateTime.now().toIso8601String(),
         });
-        
+
         return UserModel.fromJson({
           ...existingDoc.data()!,
           'uid': user.uid,
           'lastLogin': DateTime.now().toIso8601String(),
         });
       } else {
-        print('🆕 Creating new anonymous user');
         // Generate a random mage name for new anonymous users
         final mageName = AnonymousNameGenerator.generateRandomMageName();
-        print('🧙 Generated mage name: $mageName');
-        
+
         final userModel = UserModel(
           uid: user.uid,
           displayName: mageName,
@@ -190,19 +167,18 @@ class AuthService {
           createdAt: DateTime.now(),
           lastLogin: DateTime.now(),
         );
-        
+
         // Save anonymous user to Firestore
-        print('💾 Saving anonymous user to Firestore...');
-        await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
-        print('✅ Anonymous user saved successfully');
-        
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .set(userModel.toJson());
+
         return userModel;
       }
     } on FirebaseAuthException catch (e) {
-      print('❌ Firebase Auth Error: ${e.code} - ${e.message}');
       throw _handleAuthException(e);
     } catch (e) {
-      print('❌ General Error in anonymous sign-in: $e');
       throw 'Failed to sign in anonymously: $e';
     }
   }
@@ -210,14 +186,17 @@ class AuthService {
   Future<UserModel> createAnonymousUserModel(User firebaseUser) async {
     try {
       // Check if anonymous user already exists in Firestore
-      final existingDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      
+      final existingDoc = await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
+
       if (existingDoc.exists) {
         // Update last login for existing anonymous user
         await _firestore.collection('users').doc(firebaseUser.uid).update({
           'lastLogin': DateTime.now().toIso8601String(),
         });
-        
+
         return UserModel.fromJson({
           ...existingDoc.data()!,
           'uid': firebaseUser.uid,
@@ -225,7 +204,7 @@ class AuthService {
         });
       } else {
         final mageName = AnonymousNameGenerator.generateRandomMageName();
-        
+
         final userModel = UserModel(
           uid: firebaseUser.uid,
           displayName: mageName,
@@ -233,10 +212,13 @@ class AuthService {
           createdAt: DateTime.now(),
           lastLogin: DateTime.now(),
         );
-        
+
         // Save anonymous user to Firestore
-        await _firestore.collection('users').doc(firebaseUser.uid).set(userModel.toJson());
-        
+        await _firestore
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .set(userModel.toJson());
+
         return userModel;
       }
     } catch (e) {
@@ -288,13 +270,16 @@ class AuthService {
       );
 
       // Update the existing Firestore document (same UID, just change isAnonymous and add auth data)
-      await _firestore.collection('users').doc(userCredential.user!.uid).update({
-        'email': email,
-        'displayName': displayName,
-        'photoUrl': userCredential.user!.photoURL,
-        'isAnonymous': false,
-        'lastLogin': DateTime.now().toIso8601String(),
-      });
+      await _firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .update({
+            'email': email,
+            'displayName': displayName,
+            'photoUrl': userCredential.user!.photoURL,
+            'isAnonymous': false,
+            'lastLogin': DateTime.now().toIso8601String(),
+          });
 
       return authenticatedUser;
     } on FirebaseAuthException catch (e) {
@@ -314,12 +299,15 @@ class AuthService {
       }
 
       await _googleSignIn.initialize(
-        clientId: '549073578108-2rmn4e2k4jooqg3r89lda3be39aoobvs.apps.googleusercontent.com',
-        serverClientId: '549073578108-ka9hs571k3qan6mof1g5bgcrhtjsv1qh.apps.googleusercontent.com',
+        clientId:
+            '549073578108-2rmn4e2k4jooqg3r89lda3be39aoobvs.apps.googleusercontent.com',
+        serverClientId:
+            '549073578108-ka9hs571k3qan6mof1g5bgcrhtjsv1qh.apps.googleusercontent.com',
       );
+      // ignore: unnecessary_nullable_for_final_variable_declarations
+      final GoogleSignInAccount? googleUser = await _googleSignIn
+          .authenticate();
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
-      
       if (googleUser == null) {
         throw 'Google sign-in was cancelled';
       }
@@ -337,7 +325,10 @@ class AuthService {
       final authenticatedUser = UserModel(
         uid: userCredential.user!.uid, // Same UID as anonymous user
         email: userCredential.user!.email,
-        displayName: userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
+        displayName:
+            userCredential.user!.displayName ??
+            googleUser.displayName ??
+            'User',
         photoUrl: userCredential.user!.photoURL,
         isAnonymous: false, // Now authenticated
         gamesPlayed: anonymousUser.gamesPlayed,
@@ -346,15 +337,21 @@ class AuthService {
         createdAt: anonymousUser.createdAt, // Preserve original creation date
         lastLogin: DateTime.now(),
       );
-      
+
       // Update the existing Firestore document (same UID, just change isAnonymous and add auth data)
-      await _firestore.collection('users').doc(userCredential.user!.uid).update({
-        'email': userCredential.user!.email,
-        'displayName': userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
-        'photoUrl': userCredential.user!.photoURL,
-        'isAnonymous': false,
-        'lastLogin': DateTime.now().toIso8601String(),
-      });
+      await _firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .update({
+            'email': userCredential.user!.email,
+            'displayName':
+                userCredential.user!.displayName ??
+                googleUser.displayName ??
+                'User',
+            'photoUrl': userCredential.user!.photoURL,
+            'isAnonymous': false,
+            'lastLogin': DateTime.now().toIso8601String(),
+          });
 
       return authenticatedUser;
     } on FirebaseAuthException catch (e) {
@@ -377,33 +374,15 @@ class AuthService {
       );
 
       try {
-        await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .set(userModel.toJson());
         return userModel;
       } catch (e) {
         // If user already exists, fetch the existing data
-        if (e.toString().contains('DUPLICATE_RAW_ID') || 
+        if (e.toString().contains('DUPLICATE_RAW_ID') ||
             e.toString().contains('already exists')) {
-          print('ℹ️ User document already exists, fetching existing data');
-          final doc = await _firestore.collection('users').doc(user.uid).get();
-          if (doc.exists) {
-            return UserModel.fromJson({...doc.data()!, 'uid': user.uid});
-          }
-        }
-        rethrow;
-      }
-    });
-  }
-
-  Future<UserModel> _createUserDataWithModel(User user, UserModel userModel) async {
-    return await _retryFirestoreOperation(() async {
-      try {
-        await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
-        return userModel;
-      } catch (e) {
-        // If user already exists, fetch the existing data
-        if (e.toString().contains('DUPLICATE_RAW_ID') || 
-            e.toString().contains('already exists')) {
-          print('ℹ️ User document already exists, fetching existing data');
           final doc = await _firestore.collection('users').doc(user.uid).get();
           if (doc.exists) {
             return UserModel.fromJson({...doc.data()!, 'uid': user.uid});
@@ -434,7 +413,6 @@ class AuthService {
     });
   }
 
-
   Future<T> _retryFirestoreOperation<T>(Future<T> Function() operation) async {
     int retryCount = 0;
     const maxRetries = 3;
@@ -445,24 +423,22 @@ class AuthService {
         return await operation();
       } catch (e) {
         retryCount++;
-        
+
         if (e.toString().contains('unavailable') && retryCount < maxRetries) {
-          print('🔄 Firestore unavailable, retrying in ${baseDelay.inSeconds * retryCount}s (attempt $retryCount/$maxRetries)');
           await Future.delayed(baseDelay * retryCount);
           continue;
         }
-        
+
         // If it's a duplicate user error, let the specific method handle it
-        if (e.toString().contains('DUPLICATE_RAW_ID') || 
+        if (e.toString().contains('DUPLICATE_RAW_ID') ||
             e.toString().contains('already exists')) {
-          print('ℹ️ Duplicate user error detected, letting specific handler manage it');
           rethrow;
         }
-        
+
         rethrow;
       }
     }
-    
+
     throw Exception('Maximum retries exceeded for Firestore operation');
   }
 

@@ -30,7 +30,7 @@ class AnonymousLoginPrompt extends ConsumerWidget {
             Icon(
               Icons.account_circle_outlined,
               size: 64,
-              color: theme.colorScheme.primary.withOpacity(0.7),
+              color: theme.colorScheme.primary.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 16),
             Text(
@@ -47,7 +47,7 @@ class AnonymousLoginPrompt extends ConsumerWidget {
               style: TextStyle(
                 fontFamily: 'Caveat',
                 fontSize: 16,
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),

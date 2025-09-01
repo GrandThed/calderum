@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/room_model.dart';
-import '../models/room_invitation_model.dart';
 import '../models/emote_model.dart';
 import '../../account/models/user_model.dart';
 import '../../friends/services/friends_service.dart';
@@ -17,7 +16,6 @@ class RoomService {
   final FirebaseFirestore _firestore;
   final FriendsService _friendsService;
   static const String _roomsCollection = 'rooms';
-  static const String _invitationsCollection = 'room_invitations';
 
   RoomService(this._firestore, this._friendsService);
 
@@ -48,7 +46,6 @@ class RoomService {
         ...existingHostRooms.docs.first.data(),
         'id': existingHostRooms.docs.first.id,
       });
-      print('♻️ Returning existing waiting room where user is host: ${existingRoom.code}');
       return existingRoom;
     }
     
@@ -61,7 +58,6 @@ class RoomService {
     for (final doc in allWaitingRooms.docs) {
       final room = RoomModel.fromJson({...doc.data(), 'id': doc.id});
       if (room.players.any((p) => p.userId == host.uid)) {
-        print('♻️ User already in waiting room: ${room.code}');
         // User is already in a waiting room, return that room
         return room;
       }
@@ -92,11 +88,7 @@ class RoomService {
       updatedAt: now,
     );
 
-    print('🏠 Attempting to serialize room data...');
     final roomJson = room.toJson();
-    print('✅ Room JSON serialized successfully');
-    print('   - Players count: ${roomJson['players']?.length}');
-    print('   - First player type: ${roomJson['players']?[0].runtimeType}');
     
     // Manually serialize nested objects to ensure proper JSON conversion
     final playersJson = room.players.map((player) => player.toJson()).toList();
@@ -106,13 +98,7 @@ class RoomService {
     correctedRoomJson['players'] = playersJson;
     correctedRoomJson['settings'] = settingsJson;
     
-    print('🔧 Fixed nested object serialization');
-    print('   - Fixed player type: ${correctedRoomJson['players'][0].runtimeType}');
-    print('   - Fixed settings type: ${correctedRoomJson['settings'].runtimeType}');
-    
-    print('💾 Saving room to Firestore...');
     final docRef = await _firestore.collection(_roomsCollection).add(correctedRoomJson);
-    print('✅ Room saved to Firestore with ID: ${docRef.id}');
     
     return room.copyWith(id: docRef.id);
   }
@@ -402,7 +388,6 @@ class RoomService {
     
     for (final doc in abandonedRooms.docs) {
       await doc.reference.delete();
-      print('🧹 Cleaned up abandoned room: ${doc.id}');
     }
   }
   
@@ -433,7 +418,6 @@ class RoomService {
       'updatedAt': DateTime.now().toIso8601String(),
     });
     
-    print('👑 Host migrated from $oldHostId to ${newHost.userId}');
   }
   
   // Handle player reconnection

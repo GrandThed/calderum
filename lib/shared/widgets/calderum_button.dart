@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 
 enum CalderumButtonStyle {
   primary,
@@ -119,7 +118,6 @@ class CalderumButton extends StatelessWidget {
         );
       
       case CalderumButtonStyle.primary:
-      default:
         return SizedBox(
           width: width,
           height: height,

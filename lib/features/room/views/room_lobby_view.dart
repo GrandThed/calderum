@@ -8,8 +8,6 @@ import '../viewmodels/room_viewmodel.dart';
 import '../widgets/player_list_tile.dart';
 import '../widgets/room_settings_card.dart';
 import '../widgets/room_settings_dialog.dart';
-import '../widgets/emote_picker.dart';
-import '../widgets/emote_display.dart';
 import '../../friends/widgets/friend_invite_dialog.dart';
 import '../../account/services/auth_service.dart';
 import '../../../shared/widgets/calderum_button.dart';
@@ -337,7 +335,7 @@ class RoomLobbyView extends ConsumerWidget {
                       ],
                     ),
                     loading: () => const CircularProgressIndicator(),
-                    error: (_, __) => const SizedBox(),
+                    error: (_, _) => const SizedBox(),
                   ),
                 ],
               ],

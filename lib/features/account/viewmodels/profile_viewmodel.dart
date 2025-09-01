@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../models/user_model.dart';
-import '../services/auth_service.dart';
 
 part 'profile_viewmodel.g.dart';
 
@@ -23,13 +20,11 @@ class ProfileState {
 
 @riverpod
 class ProfileViewModel extends _$ProfileViewModel {
-  late final AuthService _authService;
   late final FirebaseFirestore _firestore;
   late final FirebaseAuth _auth;
 
   @override
   ProfileState build() {
-    _authService = ref.watch(authServiceProvider);
     _firestore = FirebaseFirestore.instance;
     _auth = FirebaseAuth.instance;
 
