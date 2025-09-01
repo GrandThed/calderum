@@ -2,41 +2,52 @@ import 'dart:math';
 
 class AnonymousNameGenerator {
   static final Random _random = Random();
-  
+
   static const List<String> _mageNames = [
     // Classic fantasy
     'Gandalf', 'Merlin', 'Radagast', 'Saruman', 'Elrond',
-    
+
     // Harry Potter universe
     'Dumbledore', 'McGonagall', 'Snape', 'Hermione', 'Voldemort',
     'Flamel', 'Grindelwald', 'Newt', 'Hagrid',
-    
+
     // Disney/Fairy tale
     'Jafar', 'Maleficent', 'Morgana', 'Prospero', 'Circe',
-    
+
     // Marvel/DC
     'Strange', 'Scarlet', 'Zatanna', 'Constantine', 'Fate',
-    
+
     // Mythology
     'Loki', 'Odin', 'Thoth', 'Isis', 'Hecate', 'Medea',
-    
+
     // Literature/Games
     'Raistlin', 'Elminster', 'Khadgar', 'Jaina', 'Medivh',
     'Tyrande', 'Malfurion', 'Illidan', 'Azshara', 'Rhonin',
-    
+
     // Additional fantasy names
     'Alaric', 'Celestine', 'Drakonis', 'Evangeline', 'Faelar',
     'Grimjaw', 'Hexana', 'Ignatius', 'Jinx', 'Korrigan',
     'Lunara', 'Mystral', 'Nightshade', 'Obsidian', 'Phoenix',
     'Quicksilver', 'Raven', 'Shadowmere', 'Tempest', 'Umbra',
-    'Vex', 'Whisper', 'Xylo', 'Yggdrasil', 'Zephyr'
+    'Vex', 'Whisper', 'Xylo', 'Yggdrasil', 'Zephyr',
   ];
-  
+
+  static const List<String> _colors = [
+    'Red', 'Blue', 'Green', 'Purple', 'Golden', 'Silver',
+    'Crimson', 'Azure', 'Emerald', 'Violet', 'Amber', 'Obsidian',
+    'Ivory', 'Sapphire', 'Ruby', 'Jade', 'Pearl', 'Onyx',
+    'Bronze', 'Copper', 'Iron', 'Steel', 'Shadow', 'Light',
+    'Fire', 'Ice', 'Storm', 'Earth', 'Wind', 'Lightning',
+  ];
+
   static String generateRandomMageName() {
-    final index = _random.nextInt(_mageNames.length);
-    return _mageNames[index];
+    final mageIndex = _random.nextInt(_mageNames.length);
+    final colorIndex = _random.nextInt(_colors.length);
+    final mageName = _mageNames[mageIndex];
+    final color = _colors[colorIndex];
+    return '$mageName the $color';
   }
-  
+
   static String generateUniqueAnonymousId() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final randomSuffix = _random.nextInt(9999).toString().padLeft(4, '0');
