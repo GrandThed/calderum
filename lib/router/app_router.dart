@@ -7,6 +7,7 @@ import '../features/account/views/forgot_password_view.dart';
 import '../features/account/views/profile_view.dart';
 import '../features/home/views/home_view.dart';
 import '../features/room/views/room_lobby_view.dart';
+import '../features/game/views/game_board_view.dart';
 import '../shared/constants/route_paths.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -54,6 +55,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'profile',
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const ProfileView()),
+      ),
+      GoRoute(
+        path: '/game/:gameId',
+        name: 'game',
+        pageBuilder: (context, state) {
+          final gameId = state.pathParameters['gameId']!;
+          return MaterialPage(
+            key: state.pageKey,
+            child: GameBoardView(gameId: gameId),
+          );
+        },
       ),
     ],
   );
