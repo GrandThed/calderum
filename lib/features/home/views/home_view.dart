@@ -34,7 +34,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget build(BuildContext context) {
     final createRoomState = ref.watch(createRoomViewModelProvider);
     final currentUser = ref.watch(authServiceProvider).currentUser;
-    final userRoomsAsync = currentUser != null 
+    final userRoomsAsync = currentUser != null
         ? ref.watch(userRoomsStreamProvider(currentUser.uid))
         : const AsyncValue<List<RoomModel>>.data([]);
 
@@ -80,21 +80,26 @@ class _HomeViewState extends ConsumerState<HomeView> {
               // User's Active Rooms Section
               userRoomsAsync.when(
                 data: (rooms) {
-                  final activeRooms = rooms.where((room) => 
-                    room.status == RoomStatus.waiting || 
-                    room.status == RoomStatus.inProgress
-                  ).toList();
-                  
+                  final activeRooms = rooms
+                      .where(
+                        (room) =>
+                            room.status == RoomStatus.waiting ||
+                            room.status == RoomStatus.inProgress,
+                      )
+                      .toList();
+
                   if (activeRooms.isEmpty) {
                     return const SizedBox.shrink();
                   }
-                  
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Your Active Rooms',
-                        style: AppTheme.titleStyle.copyWith(color: Colors.white),
+                        style: AppTheme.titleStyle.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       ...activeRooms.map((room) => _buildRoomCard(room)),
@@ -110,7 +115,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 loading: () => const SizedBox.shrink(),
                 error: (_, _) => const SizedBox.shrink(),
               ),
-              
+
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
@@ -140,7 +145,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Create Room Button
               createRoomState.when(
                 data: (_) => CalderumButton(
@@ -159,9 +164,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   icon: Icons.add_circle_outline,
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // OR divider
               Row(
                 children: [
@@ -190,9 +195,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Join Room Section
               Form(
                 key: _formKey,
@@ -207,7 +212,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         textCapitalization: TextCapitalization.characters,
                         inputFormatters: [
                           LengthLimitingTextInputFormatter(6),
-                          FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[A-Z0-9]'),
+                          ),
                         ],
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -229,32 +236,39 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         builder: (context, value, _) {
                           final isEmpty = value.text.isEmpty;
                           return Material(
-                            color: isEmpty 
-                              ? Theme.of(context).colorScheme.secondary
-                              : Theme.of(context).colorScheme.primary,
+                            color: isEmpty
+                                ? Theme.of(context).colorScheme.secondary
+                                : Theme.of(context).colorScheme.primary,
                             borderRadius: BorderRadius.circular(12),
                             child: Tooltip(
-                              message: isEmpty ? 'Paste room code' : 'Join room',
+                              message: isEmpty
+                                  ? 'Paste room code'
+                                  : 'Join room',
                               child: InkWell(
-                                onTap: isEmpty 
-                                  ? _pasteFromClipboard 
-                                  : (_isJoining ? null : _joinRoom),
+                                onTap: isEmpty
+                                    ? _pasteFromClipboard
+                                    : (_isJoining ? null : _joinRoom),
                                 borderRadius: BorderRadius.circular(12),
                                 child: Center(
-                                child: _isJoining
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
-                                    )
-                                  : Icon(
-                                      isEmpty ? Icons.paste : Icons.arrow_forward,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
+                                  child: _isJoining
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
+                                          ),
+                                        )
+                                      : Icon(
+                                          isEmpty
+                                              ? Icons.paste
+                                              : Icons.arrow_forward,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
                                 ),
                               ),
                             ),
@@ -286,7 +300,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       final roomCode = _roomCodeController.text.toUpperCase();
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
-      
+
       // Get current user from Firestore (works for both anonymous and authenticated users)
       final currentUser = await authService.getCurrentUserModel();
       if (currentUser == null) {
@@ -323,13 +337,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
       final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
       if (clipboardData != null && clipboardData.text != null) {
         final text = clipboardData.text!.trim().toUpperCase();
-        
+
         // Clean up the text to only include alphanumeric characters
         final cleanedText = text.replaceAll(RegExp(r'[^A-Z0-9]'), '');
-        
+
         if (cleanedText.length <= 6) {
           _roomCodeController.text = cleanedText;
-          
+
           // Show feedback
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -340,7 +354,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               ),
             );
           }
-          
+
           // Auto-join if code is 6 characters
           if (cleanedText.length == 6) {
             _joinRoom();
@@ -378,10 +392,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Widget _buildRoomCard(RoomModel room) {
-    final isHost = room.hostId == ref.read(authServiceProvider).currentUser?.uid;
+    final isHost =
+        room.hostId == ref.read(authServiceProvider).currentUser?.uid;
     final playerCount = room.players.length;
     final maxPlayers = room.settings.maxPlayers;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: AppTheme.surfaceColor.withValues(alpha: 0.8),
@@ -433,7 +448,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                              color: AppTheme.primaryColor.withValues(
+                                alpha: 0.3,
+                              ),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -463,11 +480,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               ),
               Column(
                 children: [
-                  Icon(
-                    Icons.people,
-                    color: Colors.white54,
-                    size: 20,
-                  ),
+                  Icon(Icons.people, color: Colors.white54, size: 20),
                   const SizedBox(height: 2),
                   Text(
                     '$playerCount/$maxPlayers',
@@ -479,11 +492,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ],
               ),
               const SizedBox(width: 8),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white54,
-                size: 16,
-              ),
+              Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
             ],
           ),
         ),

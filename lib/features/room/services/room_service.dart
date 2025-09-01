@@ -24,7 +24,10 @@ class RoomService {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
     return String.fromCharCodes(
-      Iterable.generate(6, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+      Iterable.generate(
+        6,
+        (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+      ),
     );
   }
 
@@ -39,7 +42,7 @@ class RoomService {
         .where('hostId', isEqualTo: host.uid)
         .where('status', isEqualTo: RoomStatus.waiting.name)
         .get();
-    
+
     if (existingHostRooms.docs.isNotEmpty) {
       // Return the existing waiting room instead of creating a new one
       final existingRoom = RoomModel.fromJson({
@@ -48,13 +51,13 @@ class RoomService {
       });
       return existingRoom;
     }
-    
+
     // Also check if user is already in a waiting room as a player
     final allWaitingRooms = await _firestore
         .collection(_roomsCollection)
         .where('status', isEqualTo: RoomStatus.waiting.name)
         .get();
-    
+
     for (final doc in allWaitingRooms.docs) {
       final room = RoomModel.fromJson({...doc.data(), 'id': doc.id});
       if (room.players.any((p) => p.userId == host.uid)) {
@@ -62,10 +65,10 @@ class RoomService {
         return room;
       }
     }
-    
+
     final roomCode = _generateRoomCode();
     final now = DateTime.now();
-    
+
     final room = RoomModel(
       id: '', // Will be set by Firestore
       code: roomCode,
@@ -89,17 +92,19 @@ class RoomService {
     );
 
     final roomJson = room.toJson();
-    
+
     // Manually serialize nested objects to ensure proper JSON conversion
     final playersJson = room.players.map((player) => player.toJson()).toList();
     final settingsJson = room.settings.toJson();
-    
+
     final correctedRoomJson = Map<String, dynamic>.from(roomJson);
     correctedRoomJson['players'] = playersJson;
     correctedRoomJson['settings'] = settingsJson;
-    
-    final docRef = await _firestore.collection(_roomsCollection).add(correctedRoomJson);
-    
+
+    final docRef = await _firestore
+        .collection(_roomsCollection)
+        .add(correctedRoomJson);
+
     return room.copyWith(id: docRef.id);
   }
 
@@ -112,7 +117,10 @@ class RoomService {
     final querySnapshot = await _firestore
         .collection(_roomsCollection)
         .where('code', isEqualTo: roomCode.toUpperCase())
-        .where('status', whereIn: [RoomStatus.waiting.name, RoomStatus.inProgress.name])
+        .where(
+          'status',
+          whereIn: [RoomStatus.waiting.name, RoomStatus.inProgress.name],
+        )
         .limit(1)
         .get();
 
@@ -135,7 +143,8 @@ class RoomService {
     }
 
     // Check if mid-game joins are allowed
-    if (room.status == RoomStatus.inProgress && !room.settings.allowMidGameJoins) {
+    if (room.status == RoomStatus.inProgress &&
+        !room.settings.allowMidGameJoins) {
       throw 'Cannot join room - game is in progress';
     }
 
@@ -165,7 +174,7 @@ class RoomService {
         playerName: existingPlayer.displayName,
         playerPhotoUrl: existingPlayer.photoUrl,
       );
-      
+
       // Add new user as recent player for existing players
       await _friendsService.addRecentPlayer(
         currentUserId: existingPlayer.userId,
@@ -175,10 +184,7 @@ class RoomService {
       );
     }
 
-    return room.copyWith(
-      players: updatedPlayers,
-      updatedAt: DateTime.now(),
-    );
+    return room.copyWith(players: updatedPlayers, updatedAt: DateTime.now());
   }
 
   // Leave room
@@ -187,7 +193,9 @@ class RoomService {
     if (!doc.exists) return;
 
     final room = RoomModel.fromJson({...doc.data()!, 'id': doc.id});
-    final updatedPlayers = room.players.where((p) => p.userId != userId).toList();
+    final updatedPlayers = room.players
+        .where((p) => p.userId != userId)
+        .toList();
 
     if (updatedPlayers.isEmpty) {
       // Delete room if no players left
@@ -198,7 +206,7 @@ class RoomService {
     // If host left, assign new host
     String newHostId = room.hostId;
     String newHostName = room.hostName;
-    
+
     if (room.hostId == userId) {
       final newHost = updatedPlayers.first;
       newHostId = newHost.userId;
@@ -214,7 +222,11 @@ class RoomService {
   }
 
   // Update player ready status
-  Future<RoomModel> updatePlayerReady(String roomId, String userId, bool isReady) async {
+  Future<RoomModel> updatePlayerReady(
+    String roomId,
+    String userId,
+    bool isReady,
+  ) async {
     final doc = await _firestore.collection(_roomsCollection).doc(roomId).get();
     if (!doc.exists) throw 'Room not found';
 
@@ -231,14 +243,15 @@ class RoomService {
       'updatedAt': DateTime.now().toIso8601String(),
     });
 
-    return room.copyWith(
-      players: updatedPlayers,
-      updatedAt: DateTime.now(),
-    );
+    return room.copyWith(players: updatedPlayers, updatedAt: DateTime.now());
   }
 
   // Update player online status
-  Future<RoomModel> _updatePlayerStatus(String roomId, String userId, {bool? isOnline}) async {
+  Future<RoomModel> _updatePlayerStatus(
+    String roomId,
+    String userId, {
+    bool? isOnline,
+  }) async {
     final doc = await _firestore.collection(_roomsCollection).doc(roomId).get();
     if (!doc.exists) throw 'Room not found';
 
@@ -258,10 +271,7 @@ class RoomService {
       'updatedAt': DateTime.now().toIso8601String(),
     });
 
-    return room.copyWith(
-      players: updatedPlayers,
-      updatedAt: DateTime.now(),
-    );
+    return room.copyWith(players: updatedPlayers, updatedAt: DateTime.now());
   }
 
   // Get room by ID
@@ -285,19 +295,28 @@ class RoomService {
   Stream<List<RoomModel>> streamUserRooms(String userId) {
     return _firestore
         .collection(_roomsCollection)
-        .where('players', arrayContains: {
-          'userId': userId,
-          'isOnline': true,
-        })
+        .where(
+          'status',
+          whereIn: [RoomStatus.waiting.name, RoomStatus.inProgress.name],
+        )
         .orderBy('updatedAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => RoomModel.fromJson({...doc.data(), 'id': doc.id}))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => RoomModel.fromJson({...doc.data(), 'id': doc.id}))
+              .where(
+                (room) => room.players.any((player) => player.userId == userId),
+              )
+              .toList(),
+        );
   }
 
   // Update room settings (host only)
-  Future<void> updateRoomSettings(String roomId, String hostId, RoomSettingsModel settings) async {
+  Future<void> updateRoomSettings(
+    String roomId,
+    String hostId,
+    RoomSettingsModel settings,
+  ) async {
     final doc = await _firestore.collection(_roomsCollection).doc(roomId).get();
     if (!doc.exists) throw 'Room not found';
 
@@ -313,7 +332,7 @@ class RoomService {
   // Emote/Reaction System
   final Map<String, DateTime> _lastEmoteTime = {};
   static const Duration _emoteCooldown = Duration(seconds: 2);
-  
+
   Future<void> sendEmote({
     required String roomId,
     required String userId,
@@ -328,10 +347,10 @@ class RoomService {
         throw 'Please wait ${(_emoteCooldown - timeSinceLastEmote).inSeconds} seconds before sending another emote';
       }
     }
-    
+
     // Update last emote time
     _lastEmoteTime['$roomId-$userId'] = DateTime.now();
-    
+
     // Create emote
     final emote = EmoteModel(
       userId: userId,
@@ -339,29 +358,34 @@ class RoomService {
       type: type,
       timestamp: DateTime.now(),
     );
-    
+
     // Send emote to room's emotes subcollection
     await _firestore
         .collection(_roomsCollection)
         .doc(roomId)
         .collection('emotes')
         .add(emote.toJson());
-    
+
     // Auto-delete emote after 5 seconds
     Timer(const Duration(seconds: 5), () async {
       final emoteDocs = await _firestore
           .collection(_roomsCollection)
           .doc(roomId)
           .collection('emotes')
-          .where('timestamp', isLessThan: DateTime.now().subtract(const Duration(seconds: 5)).toIso8601String())
+          .where(
+            'timestamp',
+            isLessThan: DateTime.now()
+                .subtract(const Duration(seconds: 5))
+                .toIso8601String(),
+          )
           .get();
-      
+
       for (final doc in emoteDocs.docs) {
         await doc.reference.delete();
       }
     });
   }
-  
+
   // Stream emotes for a room
   Stream<List<EmoteModel>> streamEmotes(String roomId) {
     return _firestore
@@ -371,55 +395,56 @@ class RoomService {
         .orderBy('timestamp', descending: true)
         .limit(10)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => EmoteModel.fromJson(doc.data()))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => EmoteModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   // Room Lifecycle Management
   Future<void> cleanupAbandonedRooms() async {
     final cutoffTime = DateTime.now().subtract(const Duration(hours: 24));
-    
+
     final abandonedRooms = await _firestore
         .collection(_roomsCollection)
         .where('status', isEqualTo: RoomStatus.waiting.name)
         .where('updatedAt', isLessThan: cutoffTime.toIso8601String())
         .get();
-    
+
     for (final doc in abandonedRooms.docs) {
       await doc.reference.delete();
     }
   }
-  
+
   // Host migration
   Future<void> migrateHost(String roomId, String oldHostId) async {
     final doc = await _firestore.collection(_roomsCollection).doc(roomId).get();
     if (!doc.exists) return;
-    
+
     final room = RoomModel.fromJson({...doc.data()!, 'id': doc.id});
-    
+
     // Find online players excluding old host
     final onlinePlayers = room.players
         .where((p) => p.userId != oldHostId && p.isOnline)
         .toList();
-    
+
     if (onlinePlayers.isEmpty) {
       // No online players, room will be deleted
       await doc.reference.delete();
       return;
     }
-    
+
     // Assign new host (first online player)
     final newHost = onlinePlayers.first;
-    
+
     await doc.reference.update({
       'hostId': newHost.userId,
       'hostName': newHost.displayName,
       'updatedAt': DateTime.now().toIso8601String(),
     });
-    
   }
-  
+
   // Handle player reconnection
   Future<RoomModel?> handleReconnection(String userId) async {
     // Find rooms where user is a player and game is in progress
@@ -427,11 +452,11 @@ class RoomService {
         .collection(_roomsCollection)
         .where('status', isEqualTo: RoomStatus.inProgress.name)
         .get();
-    
+
     for (final doc in activeRooms.docs) {
       final room = RoomModel.fromJson({...doc.data(), 'id': doc.id});
       final playerIndex = room.players.indexWhere((p) => p.userId == userId);
-      
+
       if (playerIndex != -1) {
         // Update player online status
         final updatedPlayers = [...room.players];
@@ -439,16 +464,16 @@ class RoomService {
           isOnline: true,
           lastSeen: DateTime.now(),
         );
-        
+
         await doc.reference.update({
           'players': updatedPlayers.map((p) => p.toJson()).toList(),
           'updatedAt': DateTime.now().toIso8601String(),
         });
-        
+
         return room.copyWith(players: updatedPlayers);
       }
     }
-    
+
     return null;
   }
 
