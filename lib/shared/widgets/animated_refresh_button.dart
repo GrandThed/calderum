@@ -31,13 +31,9 @@ class _AnimatedRefreshButtonState extends State<AnimatedRefreshButton>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _rotationController,
-      curve: Curves.easeOut,
-    ));
+    _rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _rotationController, curve: Curves.easeOut),
+    );
   }
 
   @override

@@ -23,7 +23,7 @@ class GameBoardView extends ConsumerWidget {
     final gameState = ref.watch(gameStreamProvider(gameId));
     final currentPlayer = ref.watch(currentPlayerProvider(gameId));
     final isHostValue = ref.watch(isHostProvider(gameId));
-  
+
     return gameState.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
@@ -249,7 +249,9 @@ class GameBoardView extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor,
-        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+        border: Border(
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        ),
       ),
       child: Row(
         children: [

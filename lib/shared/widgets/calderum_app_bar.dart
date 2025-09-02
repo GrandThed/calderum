@@ -37,13 +37,15 @@ class CalderumAppBar extends StatelessWidget implements PreferredSizeWidget {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: onBackPressed ?? () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/home');
-                  }
-                },
+                onPressed:
+                    onBackPressed ??
+                    () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/home');
+                      }
+                    },
               ),
             )
           : null,

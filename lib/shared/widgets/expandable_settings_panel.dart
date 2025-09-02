@@ -17,7 +17,8 @@ class ExpandableSettingsPanel extends StatefulWidget {
   });
 
   @override
-  State<ExpandableSettingsPanel> createState() => _ExpandableSettingsPanelState();
+  State<ExpandableSettingsPanel> createState() =>
+      _ExpandableSettingsPanelState();
 }
 
 class _ExpandableSettingsPanelState extends State<ExpandableSettingsPanel>
@@ -38,7 +39,7 @@ class _ExpandableSettingsPanelState extends State<ExpandableSettingsPanel>
       parent: _controller,
       curve: Curves.easeInOut,
     );
-    
+
     if (_isExpanded) {
       _controller.value = 1.0;
     }
@@ -64,23 +65,23 @@ class _ExpandableSettingsPanelState extends State<ExpandableSettingsPanel>
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: RoomDesignSystem.settingsPanelDecoration(AppTheme.surfaceColor),
+      decoration: RoomDesignSystem.settingsPanelDecoration(
+        AppTheme.surfaceColor,
+      ),
       child: Column(
         children: [
           InkWell(
             onTap: _handleTap,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(RoomDesignSystem.radiusMedium)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(RoomDesignSystem.radiusMedium),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(RoomDesignSystem.cardPadding),
               child: Row(
                 children: [
                   Expanded(child: widget.title),
                   if (widget.canEdit)
-                    Icon(
-                      Icons.edit,
-                      size: 16,
-                      color: AppTheme.secondaryColor,
-                    ),
+                    Icon(Icons.edit, size: 16, color: AppTheme.secondaryColor),
                   const SizedBox(width: 8),
                   AnimatedRotation(
                     turns: _isExpanded ? 0.5 : 0.0,
@@ -106,9 +107,7 @@ class _ExpandableSettingsPanelState extends State<ExpandableSettingsPanel>
                 ),
                 Padding(
                   padding: const EdgeInsets.all(RoomDesignSystem.cardPadding),
-                  child: Column(
-                    children: widget.children,
-                  ),
+                  child: Column(children: widget.children),
                 ),
               ],
             ),
@@ -142,25 +141,21 @@ class SettingRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          vertical: RoomDesignSystem.spacingSm, 
-          horizontal: RoomDesignSystem.spacingMd
+          vertical: RoomDesignSystem.spacingSm,
+          horizontal: RoomDesignSystem.spacingMd,
         ),
         decoration: BoxDecoration(
-          color: canEdit 
+          color: canEdit
               ? AppTheme.primaryColor.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(RoomDesignSystem.radiusSmall),
-          border: canEdit 
+          border: canEdit
               ? Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.3))
               : null,
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: AppTheme.primaryColor,
-              size: 20,
-            ),
+            Icon(icon, color: AppTheme.primaryColor, size: 20),
             const SizedBox(width: RoomDesignSystem.spacingMd),
             Expanded(
               child: Text(
@@ -183,11 +178,7 @@ class SettingRow extends StatelessWidget {
             ),
             if (canEdit) ...[
               const SizedBox(width: RoomDesignSystem.spacingSm),
-              Icon(
-                Icons.edit,
-                size: 16,
-                color: AppTheme.secondaryColor,
-              ),
+              Icon(Icons.edit, size: 16, color: AppTheme.secondaryColor),
             ],
           ],
         ),
