@@ -175,7 +175,7 @@ The project implements secure Firebase credential management to protect sensitiv
 - **Dynamic Capacity**: Rooms support 2-4 players (configurable by host)
 - **No Separate Join Page**: Streamlined UX with everything on the home page
 - **Room Settings**: Host can configure max players (2-4), ingredient set (1-4), and test tube variant from lobby
-- **Settings Dialog**: Available in room lobby for hosts while room status is "waiting" (no separate creation screen)
+- **Expandable Settings Panel**: In-room settings configuration with animated expand/collapse
 - **Real-time Updates**: All players see setting changes immediately via Firestore streams
 
 ## Important Architectural Decisions
@@ -195,3 +195,17 @@ The project implements secure Firebase credential management to protect sensitiv
 14. **No Monetization**: Free-to-play, no shop or purchases
 15. **No Leaderboards**: Focus on friend-based competition
 16. **Emotes Only**: No text chat, just reaction buttons
+
+## Recent UI/UX Improvements
+- **Animated Refresh Button**: 360-degree rotation animation when refreshing room lists for better visual feedback
+- **Unified Create Room Card**: Create button redesigned to match room card styling with gradient backgrounds and consistent visual hierarchy
+- **Enhanced Color Scheme**: Paste room code button now uses magical theme colors (gold for paste, purple for join) with smooth transitions
+- **Expandable Settings Panel**: Room settings integrated into lobby with animated expand/collapse functionality, only editable by host during waiting state
+- **Enhanced Player Cards**: Redesigned player list with:
+  - Subtle "YOU" corner ribbon instead of subtitle line for space efficiency
+  - Integrated host badge with crown icon and gold theming
+  - Visual gradients and shadows for current user highlighting
+  - Improved ready/waiting status indicators with icons
+  - Consistent avatar colors based on player names
+- **Micro-interactions**: Added scale animations, hover effects, and magical glow enhancements throughout the interface
+- **Accessibility**: High contrast ratios, keyboard navigation support, and reduced motion preferences

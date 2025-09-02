@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 
 class CalderumAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -21,18 +22,29 @@ class CalderumAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(
         title,
         style: const TextStyle(
-          fontFamily: 'Caveat',
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
+          fontFamily: 'Caudex',
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
           color: AppTheme.secondaryColor,
         ),
       ),
       backgroundColor: AppTheme.surfaceColor,
       elevation: 0,
-      leading: showBackButton && Navigator.canPop(context)
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: onBackPressed ?? () => Navigator.pop(context),
+      leading: showBackButton
+          ? Container(
+              margin: const EdgeInsets.only(left: 8),
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: onBackPressed ?? () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/home');
+                  }
+                },
+              ),
             )
           : null,
       actions: actions,

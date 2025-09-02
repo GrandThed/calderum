@@ -6,12 +6,15 @@ import 'package:share_plus/share_plus.dart';
 import '../models/room_model.dart';
 import '../viewmodels/room_viewmodel.dart';
 import '../widgets/player_list_tile.dart';
-import '../widgets/room_settings_card.dart';
+import '../services/room_service.dart';
 import '../widgets/room_settings_dialog.dart';
 import '../../friends/widgets/friend_invite_dialog.dart';
 import '../../account/services/auth_service.dart';
 import '../../../shared/widgets/calderum_button.dart';
 import '../../../shared/widgets/calderum_app_bar.dart';
+import '../../../shared/widgets/expandable_settings_panel.dart';
+import '../../../shared/theme/room_design_system.dart';
+import '../../../shared/theme/app_theme.dart';
 
 class RoomLobbyView extends ConsumerWidget {
   final String roomId;
@@ -87,14 +90,9 @@ class RoomLobbyView extends ConsumerWidget {
 
     return Scaffold(
       appBar: CalderumAppBar(
-        title: '🏠 Room ${room.code}',
-        showBackButton: false, // Disable default back button
+        title: 'Game Lobby',
+        showBackButton: true, // Enable back button to return home
         actions: [
-          IconButton(
-            icon: const Icon(Icons.home_outlined),
-            onPressed: () => context.go('/home'),
-            tooltip: 'Return to Home (stay in room)',
-          ),
           IconButton(
             icon: const Icon(Icons.group_add),
             onPressed: () => _showInviteFriendsDialog(context, room.code),
@@ -139,6 +137,8 @@ class RoomLobbyView extends ConsumerWidget {
         ],
       ),
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/background.png'),
@@ -147,125 +147,133 @@ class RoomLobbyView extends ConsumerWidget {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(RoomDesignSystem.screenPadding),
             child: Column(
               children: [
                 // Room info card
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.vpn_key,
-                              color: theme.colorScheme.primary,
-                              size: 32,
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Room Code',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  SelectableText(
-                                    room.code,
-                                    style: theme.textTheme.headlineMedium
-                                        ?.copyWith(
-                                          fontFamily: 'Caudex',
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 2,
-                                          color: theme.colorScheme.primary,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.copy),
-                              onPressed: () =>
-                                  _copyRoomCode(context, room.code),
-                              tooltip: 'Copy room code',
-                            ),
-                          ],
-                        ),
-                        const Divider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildInfoChip(
-                              icon: Icons.people,
-                              label: 'Players',
-                              value:
-                                  '${room.players.length}/${room.settings.maxPlayers}',
-                              theme: theme,
-                            ),
-                            _buildInfoChip(
-                              icon: _getIngredientSetIcon(
-                                room.settings.ingredientSet,
-                              ),
-                              label: 'Set',
-                              value: _getIngredientSetName(
-                                room.settings.ingredientSet,
-                              ),
-                              theme: theme,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                Container(
+                  decoration: RoomDesignSystem.roomInfoCardDecoration(
+                    AppTheme.surfaceColor,
                   ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Room settings
-                RoomSettingsCard(settings: room.settings),
-
-                const SizedBox(height: 20),
-
-                // Players list
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  padding: const EdgeInsets.all(RoomDesignSystem.cardPadding),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.vpn_key,
+                        color: theme.colorScheme.primary,
+                        size: 32,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.group, color: theme.colorScheme.primary),
-                            const SizedBox(width: 8),
                             Text(
-                              'Players (${room.players.length}/${room.settings.maxPlayers})',
-                              style: theme.textTheme.titleMedium?.copyWith(
+                              'Room Code',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            SelectableText(
+                              room.code,
+                              style: theme.textTheme.headlineMedium?.copyWith(
                                 fontFamily: 'Caudex',
                                 fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                                color: theme.colorScheme.primary,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        ...room.players.map(
-                          (player) => PlayerListTile(
-                            player: player,
-                            isHost: player.userId == room.hostId,
-                            isCurrentUser: player.userId == currentUserId,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.copy),
+                        onPressed: () => _copyRoomCode(context, room.code),
+                        tooltip: 'Copy room code',
+                      ),
+                    ],
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: RoomDesignSystem.secondarySection),
+
+                // Room settings - expandable panel
+                ExpandableSettingsPanel(
+                  title: Row(
+                    children: [
+                      Icon(Icons.settings, color: theme.colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Room Settings',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontFamily: 'Caudex',
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  canEdit: isHost && room.status == RoomStatus.waiting,
+                  initiallyExpanded: true,
+                  children: [
+                    SettingRow(
+                      icon: _getIngredientSetIcon(room.settings.ingredientSet),
+                      label: 'Ingredient Set',
+                      value: _getIngredientSetName(room.settings.ingredientSet),
+                      canEdit: isHost && room.status == RoomStatus.waiting,
+                      onTap: () =>
+                          _showIngredientSetSelector(context, ref, room),
+                    ),
+                    const SizedBox(height: RoomDesignSystem.spacingSm),
+                    SettingRow(
+                      icon: Icons.science,
+                      label: 'Test Tube Variant',
+                      value: room.settings.testTubeVariant
+                          ? 'Enabled'
+                          : 'Disabled',
+                      canEdit: isHost && room.status == RoomStatus.waiting,
+                      onTap: () => _toggleTestTube(context, ref, room),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: RoomDesignSystem.secondarySection),
+
+                // Players list
+                Container(
+                  decoration: RoomDesignSystem.roomInfoCardDecoration(
+                    AppTheme.surfaceColor,
+                  ),
+                  padding: const EdgeInsets.all(RoomDesignSystem.cardPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.group, color: theme.colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Players (${room.players.length}/${room.settings.maxPlayers})',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontFamily: 'Caudex',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: RoomDesignSystem.spacingMd),
+                      ...room.players.map(
+                        (player) => PlayerListTile(
+                          player: player,
+                          isHost: player.userId == room.hostId,
+                          isCurrentUser: player.userId == currentUserId,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: RoomDesignSystem.secondarySection),
 
                 // Action buttons
                 if (currentPlayer != null) ...[
@@ -307,7 +315,7 @@ class RoomLobbyView extends ConsumerWidget {
                               style: CalderumButtonStyle.primary,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: RoomDesignSystem.spacingSm),
                           if (!_canStartGame(room))
                             Container(
                               padding: const EdgeInsets.all(12),
@@ -338,35 +346,6 @@ class RoomLobbyView extends ConsumerWidget {
                               ),
                             ),
                         ],
-
-                        const SizedBox(height: 16),
-
-                        // Two-button layout: Return Home + Leave Room
-                        Row(
-                          children: [
-                            // Primary action - Return Home (safe)
-                            Expanded(
-                              flex: 2,
-                              child: CalderumButton(
-                                text: '🏠 Return to Home',
-                                onPressed: () => context.go('/home'),
-                                style: CalderumButtonStyle.outlined,
-                                icon: Icons.home_outlined,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            // Secondary action - Leave Room (destructive)
-                            Expanded(
-                              flex: 1,
-                              child: CalderumButton(
-                                text: '🚪 Leave',
-                                onPressed: () => _showLeaveDialog(context, ref),
-                                style: CalderumButtonStyle.danger,
-                                icon: Icons.exit_to_app,
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                     loading: () => const CircularProgressIndicator(),
@@ -381,31 +360,19 @@ class RoomLobbyView extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoChip({
-    required IconData icon,
-    required String label,
-    required String value,
-    required ThemeData theme,
-  }) {
-    return Column(
-      children: [
-        Icon(icon, color: theme.colorScheme.primary, size: 20),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        Text(
-          value,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.primary,
-          ),
-        ),
-      ],
-    );
+  bool _canStartGame(RoomModel room) {
+    final readyPlayers = room.players.where((p) => p.isReady).length;
+    return readyPlayers >= room.settings.minPlayers;
+  }
+
+  String _getStartGameMessage(RoomModel room) {
+    final readyPlayers = room.players.where((p) => p.isReady).length;
+    final needed = room.settings.minPlayers - readyPlayers;
+
+    if (needed > 0) {
+      return 'Need $needed more ready ${needed == 1 ? 'player' : 'players'} to start';
+    }
+    return '';
   }
 
   IconData _getIngredientSetIcon(IngredientSet set) {
@@ -434,21 +401,6 @@ class RoomLobbyView extends ConsumerWidget {
     }
   }
 
-  bool _canStartGame(RoomModel room) {
-    final readyPlayers = room.players.where((p) => p.isReady).length;
-    return readyPlayers >= room.settings.minPlayers;
-  }
-
-  String _getStartGameMessage(RoomModel room) {
-    final readyPlayers = room.players.where((p) => p.isReady).length;
-    final needed = room.settings.minPlayers - readyPlayers;
-
-    if (needed > 0) {
-      return 'Need $needed more ready ${needed == 1 ? 'player' : 'players'} to start';
-    }
-    return '';
-  }
-
   void _shareRoom(RoomModel room) {
     Share.share(
       'Join my Calderum game! Room code: ${room.code}',
@@ -467,80 +419,6 @@ class RoomLobbyView extends ConsumerWidget {
     Clipboard.setData(ClipboardData(text: code));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Room code copied to clipboard!')),
-    );
-  }
-
-  void _showLeaveDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: Icon(
-          Icons.warning_rounded,
-          color: Theme.of(context).colorScheme.error,
-          size: 48,
-        ),
-        title: const Text('Leave Room Forever?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'This will permanently remove you from the room. You won\'t be able to rejoin unless someone shares the room code again.',
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Tip: Use "Return to Home" to navigate while staying in the room.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.go('/home');
-            },
-            child: const Text('Return to Home'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ref.read(roomLobbyViewModelProvider(roomId).notifier).leaveRoom();
-              context.go('/home');
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            child: const Text('Leave Room'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -573,5 +451,113 @@ class RoomLobbyView extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Kick all players coming soon!')),
     );
+  }
+
+  void _showIngredientSetSelector(
+    BuildContext context,
+    WidgetRef ref,
+    RoomModel room,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Select Ingredient Set',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontFamily: 'Caudex',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ...IngredientSet.values.map((set) {
+              final isSelected = room.settings.ingredientSet == set;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  leading: Icon(_getIngredientSetIcon(set)),
+                  title: Text(_getIngredientSetName(set)),
+                  selected: isSelected,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _updateIngredientSet(ref, room, set);
+                  },
+                ),
+              );
+            }),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _toggleTestTube(BuildContext context, WidgetRef ref, RoomModel room) {
+    _updateTestTube(ref, room, !room.settings.testTubeVariant);
+  }
+
+  Future<void> _updateIngredientSet(
+    WidgetRef ref,
+    RoomModel room,
+    IngredientSet set,
+  ) async {
+    try {
+      final updatedSettings = room.settings.copyWith(ingredientSet: set);
+      final currentUserId = ref.read(authServiceProvider).currentUser?.uid;
+
+      await ref
+          .read(roomServiceProvider)
+          .updateRoomSettings(room.id, currentUserId!, updatedSettings);
+
+      ScaffoldMessenger.of(ref.context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Ingredient set updated to ${_getIngredientSetName(set)}',
+          ),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(ref.context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update ingredient set: $e'),
+          backgroundColor: Theme.of(ref.context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _updateTestTube(
+    WidgetRef ref,
+    RoomModel room,
+    bool hasTestTube,
+  ) async {
+    try {
+      final updatedSettings = room.settings.copyWith(
+        testTubeVariant: hasTestTube,
+      );
+      final currentUserId = ref.read(authServiceProvider).currentUser?.uid;
+
+      await ref
+          .read(roomServiceProvider)
+          .updateRoomSettings(room.id, currentUserId!, updatedSettings);
+
+      ScaffoldMessenger.of(ref.context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Test tube variant ${hasTestTube ? 'enabled' : 'disabled'}',
+          ),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(ref.context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update test tube variant: $e'),
+          backgroundColor: Theme.of(ref.context).colorScheme.error,
+        ),
+      );
+    }
   }
 }

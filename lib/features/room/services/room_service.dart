@@ -304,7 +304,8 @@ class RoomService {
             RoomStatus.paused.name,
           ],
         )
-        .orderBy('updatedAt', descending: true)
+        // Temporarily removed orderBy to avoid index requirement
+        // .orderBy('updatedAt', descending: true)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
@@ -312,7 +313,9 @@ class RoomService {
               .where(
                 (room) => room.players.any((player) => player.userId == userId),
               )
-              .toList(),
+              .toList()
+              // Sort in memory as a temporary workaround
+              ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)),
         );
   }
 

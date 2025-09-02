@@ -4,14 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/calderum_app_bar.dart';
-import '../../../shared/widgets/calderum_button.dart';
 import '../../../shared/widgets/calderum_text_field.dart';
+import '../../../shared/widgets/animated_refresh_button.dart';
+import '../../../shared/widgets/create_room_card.dart';
 import '../../../shared/constants/route_paths.dart';
-import '../../../shared/providers/providers.dart';
 import '../../room/viewmodels/room_viewmodel.dart';
 import '../../room/services/room_service.dart';
 import '../../room/models/room_model.dart';
 import '../../account/services/auth_service.dart';
+import '../../account/viewmodels/auth_viewmodel.dart';
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -33,25 +34,44 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   Future<void> _refreshRooms() async {
     // Force refresh by invalidating the specific provider instance
-    final currentUser = ref.read(currentUserProvider);
-    if (currentUser != null) {
-      ref.invalidate(userRoomsStreamProvider(currentUser.uid));
+    final authState = ref.read(authViewModelProvider);
+    final currentUserId = authState.when(
+      initial: () => null,
+      loading: () => null,
+      error: (message) => null,
+      anonymous: (user) => user.uid,
+      authenticated: (user) => user.uid,
+      unauthenticated: () => null,
+    );
+    if (currentUserId != null) {
+      ref.invalidate(userRoomsStreamProvider(currentUserId));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final createRoomState = ref.watch(createRoomViewModelProvider);
-    final currentUser = ref.watch(currentUserProvider);
     
-    print('🏠 Home: Current user: ${currentUser?.uid ?? "null"}');
+    final createRoomState = ref.watch(createRoomViewModelProvider);
+    
+    // Use the AuthViewModel which has stable auth state management
+    final authState = ref.watch(authViewModelProvider);
+    
+    // Extract user ID from auth state
+    final currentUserId = authState.when(
+      initial: () => null,
+      loading: () => null,
+      error: (message) => null,
+      anonymous: (user) => user.uid,
+      authenticated: (user) => user.uid,
+      unauthenticated: () => null,
+    );
+    
     
     // Only watch the stream if we have a stable user ID
-    final userRoomsAsync = currentUser?.uid != null
-        ? ref.watch(userRoomsStreamProvider(currentUser!.uid))
+    final userRoomsAsync = currentUserId != null
+        ? ref.watch(userRoomsStreamProvider(currentUserId))
         : const AsyncValue<List<RoomModel>>.data([]);
     
-    print('🏠 Home: userRoomsAsync state: ${userRoomsAsync.runtimeType}');
 
     // Listen for successful room creation
     ref.listen(createRoomViewModelProvider, (previous, next) {
@@ -98,229 +118,214 @@ class _HomeViewState extends ConsumerState<HomeView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // User's Active Rooms Section
-                userRoomsAsync.when(
-                data: (rooms) {
-                  print('🏠 Home: Received ${rooms.length} total rooms');
-                  final activeRooms = rooms
-                      .where(
-                        (room) => room.status != RoomStatus.finished,
-                      )
-                      .toList();
-                  
-                  print('🏠 Home: Filtered to ${activeRooms.length} active rooms');
-                  for (final room in activeRooms) {
-                    print('   - Room ${room.code}: ${room.status.name}');
-                  }
+                // Build UI based on room data
+                Builder(
+                  builder: (context) {
+                    return userRoomsAsync.when(
+                      data: (rooms) {
+                        final activeRooms = rooms
+                            .where(
+                              (room) => room.status != RoomStatus.finished,
+                            )
+                            .toList();
+                        
 
-                  if (activeRooms.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
+                        final hasActiveRooms = activeRooms.isNotEmpty;
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Your Active Rooms',
-                            style: AppTheme.titleStyle.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: _refreshRooms,
-                            icon: const Icon(Icons.refresh),
-                            color: Colors.white70,
-                            tooltip: 'Refresh rooms',
-                            iconSize: 20,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      ...activeRooms.map((room) => _buildRoomCard(room)),
-                      const SizedBox(height: 24),
-                      Divider(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        thickness: 1,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                  );
-                },
-                loading: () {
-                  print('🏠 Home: Room list is loading...');
-                  return const SizedBox.shrink();
-                },
-                error: (error, _) {
-                  print('🏠 Home: Room list error: $error');
-                  return const SizedBox.shrink();
-                },
-              ),
-
-              Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceColor.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                    width: 2,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.science,
-                      size: 80,
-                      color: AppTheme.secondaryColor,
-                    ),
-                    const SizedBox(height: 20),
-                    Text('Ready to Brew?', style: AppTheme.headlineStyle),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Create a new brewing session or join with a room code',
-                      style: AppTheme.bodyStyle.copyWith(color: Colors.white60),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Create Room Button
-              createRoomState.when(
-                data: (_) => CalderumButton(
-                  text: 'Create Room',
-                  onPressed: _createRoom,
-                  icon: Icons.add_circle_outline,
-                ),
-                loading: () => CalderumButton(
-                  text: 'Creating Room...',
-                  onPressed: null, // Disabled while loading
-                  icon: Icons.add_circle_outline,
-                ),
-                error: (_, _) => CalderumButton(
-                  text: 'Create Room',
-                  onPressed: _createRoom,
-                  icon: Icons.add_circle_outline,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // OR divider
-              Row(
-                children: [
-                  Expanded(
-                    child: Divider(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      thickness: 1,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR',
-                      style: AppTheme.bodyStyle.copyWith(
-                        color: Colors.white60,
-                        fontFamily: 'Caveat',
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Divider(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      thickness: 1,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Join Room Section
-              Form(
-                key: _formKey,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: CalderumTextField(
-                        controller: _roomCodeController,
-                        label: 'Room Code',
-                        hint: 'Enter 6-digit room code',
-                        prefixIcon: Icons.vpn_key,
-                        textCapitalization: TextCapitalization.characters,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(6),
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'[A-Z0-9]'),
-                          ),
-                        ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a room code';
-                          }
-                          if (value.length != 6) {
-                            return 'Room code must be 6 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 56,
-                      height: 56,
-                      child: ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: _roomCodeController,
-                        builder: (context, value, _) {
-                          final isEmpty = value.text.isEmpty;
-                          return Material(
-                            color: isEmpty
-                                ? Theme.of(context).colorScheme.secondary
-                                : Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Tooltip(
-                              message: isEmpty
-                                  ? 'Paste room code'
-                                  : 'Join room',
-                              child: InkWell(
-                                onTap: isEmpty
-                                    ? _pasteFromClipboard
-                                    : (_isJoining ? null : _joinRoom),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Center(
-                                  child: _isJoining
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  Colors.white,
-                                                ),
-                                          ),
-                                        )
-                                      : Icon(
-                                          isEmpty
-                                              ? Icons.paste
-                                              : Icons.arrow_forward,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Active Rooms Section
+                            if (hasActiveRooms) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Your Active Rooms',
+                                    style: AppTheme.titleStyle.copyWith(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  AnimatedRefreshButton(
+                                    onPressed: _refreshRooms,
+                                    color: Colors.white70,
+                                    tooltip: 'Refresh rooms',
+                                    iconSize: 20,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              ...activeRooms.map((room) => _buildRoomCard(room)),
+                              const SizedBox(height: 24),
+                              Divider(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                thickness: 1,
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+                            
+                            // "Ready to Brew?" container - only show when no active rooms
+                            if (!hasActiveRooms) ...[
+                              Container(
+                                padding: const EdgeInsets.all(32),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.surfaceColor.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.science,
+                                      size: 80,
+                                      color: AppTheme.secondaryColor,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Text('Ready to Brew?', style: AppTheme.headlineStyle),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Create a new brewing session or join with a room code',
+                                      style: AppTheme.bodyStyle.copyWith(color: Colors.white60),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                               ),
+                              const SizedBox(height: 32),
+                            ],
+                            
+                            // Create Room Card
+                            createRoomState.when(
+                              data: (_) => CreateRoomCard(
+                                onPressed: _createRoom,
+                              ),
+                              loading: () => const CreateRoomCard(
+                                onPressed: null,
+                                isLoading: true,
+                              ),
+                              error: (_, _) => CreateRoomCard(
+                                onPressed: _createRoom,
+                              ),
                             ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+
+                            const SizedBox(height: 24),
+
+                            // Join Room Section
+                            Form(
+                              key: _formKey,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: CalderumTextField(
+                                      controller: _roomCodeController,
+                                      label: 'Room Code',
+                                      hint: 'Enter 6-digit room code',
+                                      prefixIcon: Icons.vpn_key,
+                                      textCapitalization: TextCapitalization.characters,
+                                      inputFormatters: [
+                                        LengthLimitingTextInputFormatter(6),
+                                        FilteringTextInputFormatter.allow(
+                                          RegExp(r'[A-Z0-9]'),
+                                        ),
+                                      ],
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter a room code';
+                                        }
+                                        if (value.length != 6) {
+                                          return 'Room code must be 6 characters';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  SizedBox(
+                                    width: 56,
+                                    height: 56,
+                                    child: ValueListenableBuilder<TextEditingValue>(
+                                      valueListenable: _roomCodeController,
+                                      builder: (context, value, _) {
+                                        final isEmpty = value.text.isEmpty;
+                                        return AnimatedContainer(
+                                          duration: const Duration(milliseconds: 300),
+                                          decoration: BoxDecoration(
+                                            color: isEmpty
+                                                ? AppTheme.secondaryColor.withValues(alpha: 0.8)
+                                                : AppTheme.primaryColor,
+                                            borderRadius: BorderRadius.circular(12),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: (isEmpty 
+                                                    ? AppTheme.secondaryColor 
+                                                    : AppTheme.primaryColor).withValues(alpha: 0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: Tooltip(
+                                              message: isEmpty
+                                                  ? 'Paste room code'
+                                                  : 'Join room',
+                                              child: InkWell(
+                                                onTap: isEmpty
+                                                    ? _pasteFromClipboard
+                                                    : (_isJoining ? null : _joinRoom),
+                                                borderRadius: BorderRadius.circular(12),
+                                                child: SizedBox(
+                                                  width: 56,
+                                                  height: 56,
+                                                  child: Center(
+                                                    child: _isJoining
+                                                        ? const SizedBox(
+                                                            width: 20,
+                                                            height: 20,
+                                                            child: CircularProgressIndicator(
+                                                              strokeWidth: 2,
+                                                              valueColor:
+                                                                  AlwaysStoppedAnimation<Color>(
+                                                                    Colors.white,
+                                                                  ),
+                                                            ),
+                                                          )
+                                                        : Icon(
+                                                            isEmpty
+                                                                ? Icons.paste
+                                                                : Icons.arrow_forward,
+                                                            color: Colors.white,
+                                                            size: 24,
+                                                          ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      loading: () {
+                        return const SizedBox.shrink();
+                      },
+                      error: (error, _) {
+                        return const SizedBox.shrink();
+                      },
+                    );
+                  },
                 ),
-              ),
+
             ],
           ),
         ),

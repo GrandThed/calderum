@@ -58,6 +58,8 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
       ),
       extendBodyBehindAppBar: true,
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/background.png'),
