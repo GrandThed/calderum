@@ -88,7 +88,13 @@ class RoomLobbyView extends ConsumerWidget {
     return Scaffold(
       appBar: CalderumAppBar(
         title: '🏠 Room ${room.code}',
+        showBackButton: false, // Disable default back button
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home_outlined),
+            onPressed: () => context.go('/home'),
+            tooltip: 'Return to Home (stay in room)',
+          ),
           IconButton(
             icon: const Icon(Icons.group_add),
             onPressed: () => _showInviteFriendsDialog(context, room.code),
@@ -335,13 +341,31 @@ class RoomLobbyView extends ConsumerWidget {
 
                         const SizedBox(height: 16),
 
-                        SizedBox(
-                          width: double.infinity,
-                          child: CalderumButton(
-                            text: '🚪 Leave Room',
-                            onPressed: () => _showLeaveDialog(context, ref),
-                            style: CalderumButtonStyle.danger,
-                          ),
+                        // Two-button layout: Return Home + Leave Room
+                        Row(
+                          children: [
+                            // Primary action - Return Home (safe)
+                            Expanded(
+                              flex: 2,
+                              child: CalderumButton(
+                                text: '🏠 Return to Home',
+                                onPressed: () => context.go('/home'),
+                                style: CalderumButtonStyle.outlined,
+                                icon: Icons.home_outlined,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            // Secondary action - Leave Room (destructive)
+                            Expanded(
+                              flex: 1,
+                              child: CalderumButton(
+                                text: '🚪 Leave',
+                                onPressed: () => _showLeaveDialog(context, ref),
+                                style: CalderumButtonStyle.danger,
+                                icon: Icons.exit_to_app,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -450,8 +474,47 @@ class RoomLobbyView extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Leave Room'),
-        content: const Text('Are you sure you want to leave this room?'),
+        icon: Icon(
+          Icons.warning_rounded,
+          color: Theme.of(context).colorScheme.error,
+          size: 48,
+        ),
+        title: const Text('Leave Room Forever?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This will permanently remove you from the room. You won\'t be able to rejoin unless someone shares the room code again.',
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Tip: Use "Return to Home" to navigate while staying in the room.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -460,10 +523,21 @@ class RoomLobbyView extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
+              context.go('/home');
+            },
+            child: const Text('Return to Home'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
               ref.read(roomLobbyViewModelProvider(roomId).notifier).leaveRoom();
               context.go('/home');
             },
-            child: const Text('Leave'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: const Text('Leave Room'),
           ),
         ],
       ),
