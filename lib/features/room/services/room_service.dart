@@ -297,7 +297,12 @@ class RoomService {
         .collection(_roomsCollection)
         .where(
           'status',
-          whereIn: [RoomStatus.waiting.name, RoomStatus.inProgress.name],
+          whereIn: [
+            RoomStatus.waiting.name,
+            RoomStatus.starting.name,
+            RoomStatus.inProgress.name,
+            RoomStatus.paused.name,
+          ],
         )
         .orderBy('updatedAt', descending: true)
         .snapshots()

@@ -73,6 +73,10 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   
+  # Testing dependencies
+  fake_cloud_firestore: ^3.1.0
+  mocktail: ^1.0.3
+  
   # Code Generation
   build_runner: ^2.4.11
   freezed: ^2.5.2
