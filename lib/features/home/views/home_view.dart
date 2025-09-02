@@ -7,6 +7,7 @@ import '../../../shared/widgets/calderum_app_bar.dart';
 import '../../../shared/widgets/calderum_button.dart';
 import '../../../shared/widgets/calderum_text_field.dart';
 import '../../../shared/constants/route_paths.dart';
+import '../../../shared/providers/providers.dart';
 import '../../room/viewmodels/room_viewmodel.dart';
 import '../../room/services/room_service.dart';
 import '../../room/models/room_model.dart';
@@ -32,7 +33,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   Future<void> _refreshRooms() async {
     // Force refresh by invalidating the specific provider instance
-    final currentUser = ref.read(authServiceProvider).currentUser;
+    final currentUser = ref.read(currentUserProvider);
     if (currentUser != null) {
       ref.invalidate(userRoomsStreamProvider(currentUser.uid));
     }
@@ -41,13 +42,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
   @override
   Widget build(BuildContext context) {
     final createRoomState = ref.watch(createRoomViewModelProvider);
-    final authState = ref.watch(authServiceProvider);
-    final currentUser = authState.currentUser;
+    final currentUser = ref.watch(currentUserProvider);
+    
+    print('🏠 Home: Current user: ${currentUser?.uid ?? "null"}');
     
     // Only watch the stream if we have a stable user ID
     final userRoomsAsync = currentUser?.uid != null
         ? ref.watch(userRoomsStreamProvider(currentUser!.uid))
         : const AsyncValue<List<RoomModel>>.data([]);
+    
+    print('🏠 Home: userRoomsAsync state: ${userRoomsAsync.runtimeType}');
 
     // Listen for successful room creation
     ref.listen(createRoomViewModelProvider, (previous, next) {
