@@ -70,7 +70,7 @@ enum RoomStatus {
 enum IngredientSet {
   @JsonValue('set1')
   set1,
-  @JsonValue('set2') 
+  @JsonValue('set2')
   set2,
   @JsonValue('set3')
   set3,

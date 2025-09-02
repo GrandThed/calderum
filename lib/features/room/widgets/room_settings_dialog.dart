@@ -41,10 +41,7 @@ class _RoomSettingsDialogState extends ConsumerState<RoomSettingsDialog> {
       backgroundColor: AppTheme.surfaceColor,
       title: Row(
         children: [
-          Icon(
-            Icons.settings,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.settings, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Text(
             'Room Settings',
@@ -162,10 +159,7 @@ class _RoomSettingsDialogState extends ConsumerState<RoomSettingsDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.science,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.science, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -180,10 +174,7 @@ class _RoomSettingsDialogState extends ConsumerState<RoomSettingsDialog> {
                         ),
                         Text(
                           'Advanced gameplay with test tubes',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white60,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.white60),
                         ),
                       ],
                     ),
@@ -196,7 +187,9 @@ class _RoomSettingsDialogState extends ConsumerState<RoomSettingsDialog> {
                       });
                     },
                     activeThumbColor: theme.colorScheme.primary,
-                    activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
+                    activeTrackColor: theme.colorScheme.primary.withValues(
+                      alpha: 0.5,
+                    ),
                   ),
                 ],
               ),

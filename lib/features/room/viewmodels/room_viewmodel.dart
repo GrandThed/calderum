@@ -15,26 +15,28 @@ class CreateRoomViewModel extends _$CreateRoomViewModel {
 
   Future<void> createRoom({RoomSettingsModel? settings}) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
-      
+
       final currentUser = await authService.getCurrentUserModel();
-      
+
       if (currentUser == null) {
         throw 'User not authenticated';
       }
 
       // Use default settings if none provided (instant room creation)
-      final roomSettings = settings ?? const RoomSettingsModel(
-        maxPlayers: 4,
-        minPlayers: 1,
-        ingredientSet: IngredientSet.set1,
-        testTubeVariant: false,
-        allowMidGameJoins: false,
-        allowSpectators: false,
-      );
+      final roomSettings =
+          settings ??
+          const RoomSettingsModel(
+            maxPlayers: 4,
+            minPlayers: 1,
+            ingredientSet: IngredientSet.set1,
+            testTubeVariant: false,
+            allowMidGameJoins: false,
+            allowSpectators: false,
+          );
 
       final room = await roomService.createRoom(
         host: currentUser,
@@ -57,11 +59,11 @@ class JoinRoomViewModel extends _$JoinRoomViewModel {
 
   Future<void> joinRoom(String roomCode) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
-      
+
       final currentUser = await authService.getCurrentUserModel();
       if (currentUser == null) {
         throw 'User not authenticated';
@@ -100,11 +102,11 @@ class RoomLobbyViewModel extends _$RoomLobbyViewModel {
 
   Future<void> toggleReady() async {
     state = const AsyncValue.loading();
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
-      
+
       final currentUser = await authService.getCurrentUserModel();
       if (currentUser == null) {
         throw 'User not authenticated';
@@ -118,7 +120,7 @@ class RoomLobbyViewModel extends _$RoomLobbyViewModel {
             (p) => p.userId == currentUser.uid,
             orElse: () => throw 'Player not found in room',
           );
-          
+
           await roomService.updatePlayerReady(
             roomId,
             currentUser.uid,
@@ -137,11 +139,11 @@ class RoomLobbyViewModel extends _$RoomLobbyViewModel {
 
   Future<void> leaveRoom() async {
     state = const AsyncValue.loading();
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
-      
+
       final currentUser = await authService.getCurrentUserModel();
       if (currentUser == null) {
         throw 'User not authenticated';
@@ -156,11 +158,11 @@ class RoomLobbyViewModel extends _$RoomLobbyViewModel {
 
   Future<void> startGame() async {
     state = const AsyncValue.loading();
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
-      
+
       final currentUser = await authService.getCurrentUserModel();
       if (currentUser == null) {
         throw 'User not authenticated';
@@ -175,11 +177,11 @@ class RoomLobbyViewModel extends _$RoomLobbyViewModel {
 
   Future<void> updateSettings(RoomSettingsModel settings) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
-      
+
       final currentUser = await authService.getCurrentUserModel();
       if (currentUser == null) {
         throw 'User not authenticated';

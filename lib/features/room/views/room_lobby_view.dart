@@ -16,10 +16,7 @@ import '../../../shared/widgets/calderum_app_bar.dart';
 class RoomLobbyView extends ConsumerWidget {
   final String roomId;
 
-  const RoomLobbyView({
-    required this.roomId,
-    super.key,
-  });
+  const RoomLobbyView({required this.roomId, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,10 +55,7 @@ class RoomLobbyView extends ConsumerWidget {
                 color: theme.colorScheme.error,
               ),
               const SizedBox(height: 16),
-              Text(
-                'Room not found',
-                style: theme.textTheme.headlineSmall,
-              ),
+              Text('Room not found', style: theme.textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text('$error'),
               const SizedBox(height: 24),
@@ -177,19 +171,21 @@ class RoomLobbyView extends ConsumerWidget {
                                   ),
                                   SelectableText(
                                     room.code,
-                                    style: theme.textTheme.headlineMedium?.copyWith(
-                                      fontFamily: 'Caudex',
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
-                                      color: theme.colorScheme.primary,
-                                    ),
+                                    style: theme.textTheme.headlineMedium
+                                        ?.copyWith(
+                                          fontFamily: 'Caudex',
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 2,
+                                          color: theme.colorScheme.primary,
+                                        ),
                                   ),
                                 ],
                               ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.copy),
-                              onPressed: () => _copyRoomCode(context, room.code),
+                              onPressed: () =>
+                                  _copyRoomCode(context, room.code),
                               tooltip: 'Copy room code',
                             ),
                           ],
@@ -201,13 +197,18 @@ class RoomLobbyView extends ConsumerWidget {
                             _buildInfoChip(
                               icon: Icons.people,
                               label: 'Players',
-                              value: '${room.players.length}/${room.settings.maxPlayers}',
+                              value:
+                                  '${room.players.length}/${room.settings.maxPlayers}',
                               theme: theme,
                             ),
                             _buildInfoChip(
-                              icon: _getIngredientSetIcon(room.settings.ingredientSet),
+                              icon: _getIngredientSetIcon(
+                                room.settings.ingredientSet,
+                              ),
                               label: 'Set',
-                              value: _getIngredientSetName(room.settings.ingredientSet),
+                              value: _getIngredientSetName(
+                                room.settings.ingredientSet,
+                              ),
                               theme: theme,
                             ),
                           ],
@@ -216,14 +217,14 @@ class RoomLobbyView extends ConsumerWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Room settings
                 RoomSettingsCard(settings: room.settings),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Players list
                 Card(
                   elevation: 4,
@@ -234,10 +235,7 @@ class RoomLobbyView extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(
-                              Icons.group,
-                              color: theme.colorScheme.primary,
-                            ),
+                            Icon(Icons.group, color: theme.colorScheme.primary),
                             const SizedBox(width: 8),
                             Text(
                               'Players (${room.players.length}/${room.settings.maxPlayers})',
@@ -249,18 +247,20 @@ class RoomLobbyView extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        ...room.players.map((player) => PlayerListTile(
-                          player: player,
-                          isHost: player.userId == room.hostId,
-                          isCurrentUser: player.userId == currentUserId,
-                        )),
+                        ...room.players.map(
+                          (player) => PlayerListTile(
+                            player: player,
+                            isHost: player.userId == room.hostId,
+                            isCurrentUser: player.userId == currentUserId,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Action buttons
                 if (currentPlayer != null) ...[
                   lobbyState.when(
@@ -270,25 +270,33 @@ class RoomLobbyView extends ConsumerWidget {
                           SizedBox(
                             width: double.infinity,
                             child: CalderumButton(
-                              text: currentPlayer.isReady ? '⏸️ Not Ready' : '✅ Ready',
+                              text: currentPlayer.isReady
+                                  ? '⏸️ Not Ready'
+                                  : '✅ Ready',
                               onPressed: () => ref
-                                  .read(roomLobbyViewModelProvider(roomId).notifier)
+                                  .read(
+                                    roomLobbyViewModelProvider(roomId).notifier,
+                                  )
                                   .toggleReady(),
-                              style: currentPlayer.isReady 
+                              style: currentPlayer.isReady
                                   ? CalderumButtonStyle.secondary
                                   : CalderumButtonStyle.primary,
                             ),
                           ),
-                        
+
                         if (isHost) ...[
                           SizedBox(
                             width: double.infinity,
                             child: CalderumButton(
                               text: '🚀 Start Game',
-                              onPressed: _canStartGame(room) 
+                              onPressed: _canStartGame(room)
                                   ? () => ref
-                                      .read(roomLobbyViewModelProvider(roomId).notifier)
-                                      .startGame()
+                                        .read(
+                                          roomLobbyViewModelProvider(
+                                            roomId,
+                                          ).notifier,
+                                        )
+                                        .startGame()
                                   : null,
                               style: CalderumButtonStyle.primary,
                             ),
@@ -312,18 +320,21 @@ class RoomLobbyView extends ConsumerWidget {
                                   Expanded(
                                     child: Text(
                                       _getStartGameMessage(room),
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onErrorContainer,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onErrorContainer,
+                                          ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                         ],
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         SizedBox(
                           width: double.infinity,
                           child: CalderumButton(
@@ -407,7 +418,7 @@ class RoomLobbyView extends ConsumerWidget {
   String _getStartGameMessage(RoomModel room) {
     final readyPlayers = room.players.where((p) => p.isReady).length;
     final needed = room.settings.minPlayers - readyPlayers;
-    
+
     if (needed > 0) {
       return 'Need $needed more ready ${needed == 1 ? 'player' : 'players'} to start';
     }
@@ -459,12 +470,18 @@ class RoomLobbyView extends ConsumerWidget {
     );
   }
 
-  void _showSettingsDialog(BuildContext context, WidgetRef ref, RoomModel room) {
+  void _showSettingsDialog(
+    BuildContext context,
+    WidgetRef ref,
+    RoomModel room,
+  ) {
     // Only allow settings changes in waiting state
     if (room.status != RoomStatus.waiting) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Settings can only be changed while waiting for players'),
+          content: Text(
+            'Settings can only be changed while waiting for players',
+          ),
         ),
       );
       return;
@@ -472,10 +489,8 @@ class RoomLobbyView extends ConsumerWidget {
 
     showDialog(
       context: context,
-      builder: (context) => RoomSettingsDialog(
-        roomId: room.id,
-        currentSettings: room.settings,
-      ),
+      builder: (context) =>
+          RoomSettingsDialog(roomId: room.id, currentSettings: room.settings),
     );
   }
 

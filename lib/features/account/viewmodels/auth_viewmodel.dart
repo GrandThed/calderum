@@ -21,7 +21,9 @@ class AuthViewModel extends _$AuthViewModel {
           if (user != null) {
             if (user.isAnonymous) {
               // Create/retrieve anonymous user model from Firestore
-              final anonymousUser = await _authService.createAnonymousUserModel(user);
+              final anonymousUser = await _authService.createAnonymousUserModel(
+                user,
+              );
               state = AuthState.anonymous(anonymousUser);
             } else {
               // Get authenticated user from Firestore
@@ -117,10 +119,7 @@ class AuthViewModel extends _$AuthViewModel {
     required String displayName,
   }) async {
     final currentState = state;
-    if (!currentState.maybeWhen(
-      anonymous: (_) => true,
-      orElse: () => false,
-    )) {
+    if (!currentState.maybeWhen(anonymous: (_) => true, orElse: () => false)) {
       state = const AuthState.error('No anonymous user to link');
       return;
     }
@@ -131,7 +130,7 @@ class AuthViewModel extends _$AuthViewModel {
         anonymous: (user) => user,
         orElse: () => null,
       );
-      
+
       if (anonymousUser == null) {
         throw 'No anonymous user found';
       }
@@ -150,10 +149,7 @@ class AuthViewModel extends _$AuthViewModel {
 
   Future<void> linkAnonymousToGoogle() async {
     final currentState = state;
-    if (!currentState.maybeWhen(
-      anonymous: (_) => true,
-      orElse: () => false,
-    )) {
+    if (!currentState.maybeWhen(anonymous: (_) => true, orElse: () => false)) {
       state = const AuthState.error('No anonymous user to link');
       return;
     }
@@ -164,7 +160,7 @@ class AuthViewModel extends _$AuthViewModel {
         anonymous: (user) => user,
         orElse: () => null,
       );
-      
+
       if (anonymousUser == null) {
         throw 'No anonymous user found';
       }
@@ -196,15 +192,11 @@ class AuthViewModel extends _$AuthViewModel {
     );
   }
 
-  bool get isAnonymous => state.maybeWhen(
-    anonymous: (_) => true,
-    orElse: () => false,
-  );
+  bool get isAnonymous =>
+      state.maybeWhen(anonymous: (_) => true, orElse: () => false);
 
-  bool get isAuthenticated => state.maybeWhen(
-    authenticated: (_) => true,
-    orElse: () => false,
-  );
+  bool get isAuthenticated =>
+      state.maybeWhen(authenticated: (_) => true, orElse: () => false);
 
   bool get hasUser => getCurrentUser() != null;
 }

@@ -76,7 +76,9 @@ class AnonymousLoginPrompt extends ConsumerWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () async {
-                  final authViewModel = ref.read(authViewModelProvider.notifier);
+                  final authViewModel = ref.read(
+                    authViewModelProvider.notifier,
+                  );
                   await authViewModel.linkAnonymousToGoogle();
                   onLoginSuccess?.call();
                 },

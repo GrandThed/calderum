@@ -58,7 +58,9 @@ class FriendsService {
       sentAt: DateTime.now(),
     );
 
-    await _firestore.collection(_friendRequestsCollection).add(request.toJson());
+    await _firestore
+        .collection(_friendRequestsCollection)
+        .add(request.toJson());
   }
 
   // Accept friend request
@@ -113,19 +115,19 @@ class FriendsService {
     );
 
     // Update request status
-    batch.update(
-      requestDoc.reference,
-      {'status': FriendRequestStatus.accepted.name},
-    );
+    batch.update(requestDoc.reference, {
+      'status': FriendRequestStatus.accepted.name,
+    });
 
     await batch.commit();
   }
 
   // Reject friend request
   Future<void> rejectFriendRequest(String requestId) async {
-    await _firestore.collection(_friendRequestsCollection).doc(requestId).update({
-      'status': FriendRequestStatus.rejected.name,
-    });
+    await _firestore
+        .collection(_friendRequestsCollection)
+        .doc(requestId)
+        .update({'status': FriendRequestStatus.rejected.name});
   }
 
   // Remove friend
@@ -161,9 +163,11 @@ class FriendsService {
         .collection('user_friends')
         .orderBy('addedAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => FriendModel.fromJson(doc.data()))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => FriendModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   // Get incoming friend requests
@@ -174,12 +178,14 @@ class FriendsService {
         .where('status', isEqualTo: FriendRequestStatus.pending.name)
         .orderBy('sentAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => FriendRequestModel.fromJson({
-                  ...doc.data(),
-                  'id': doc.id,
-                }))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) =>
+                    FriendRequestModel.fromJson({...doc.data(), 'id': doc.id}),
+              )
+              .toList(),
+        );
   }
 
   // Get outgoing friend requests
@@ -190,12 +196,14 @@ class FriendsService {
         .where('status', isEqualTo: FriendRequestStatus.pending.name)
         .orderBy('sentAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => FriendRequestModel.fromJson({
-                  ...doc.data(),
-                  'id': doc.id,
-                }))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) =>
+                    FriendRequestModel.fromJson({...doc.data(), 'id': doc.id}),
+              )
+              .toList(),
+        );
   }
 
   // Add recent player
@@ -244,9 +252,11 @@ class FriendsService {
         .orderBy('lastPlayedWith', descending: true)
         .limit(20)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => RecentPlayerModel.fromJson(doc.data()))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => RecentPlayerModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   // Search users by display name (for friend requests)

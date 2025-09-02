@@ -49,9 +49,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
     });
 
     return Scaffold(
-      appBar: const CalderumAppBar(
-        title: '🚪 Join Room',
-      ),
+      appBar: const CalderumAppBar(title: '🚪 Join Room'),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -79,7 +77,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                           color: theme.colorScheme.primary,
                         ),
                         const SizedBox(height: 24),
-                        
+
                         Text(
                           '🎮 Join a Room',
                           style: theme.textTheme.headlineSmall?.copyWith(
@@ -89,7 +87,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        
+
                         Text(
                           '🔗 Enter the room code to join',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -99,7 +97,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        
+
                         CalderumTextField(
                           controller: _roomCodeController,
                           label: 'Room Code',
@@ -107,7 +105,9 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                           keyboardType: TextInputType.text,
                           textCapitalization: TextCapitalization.characters,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[A-Z0-9]'),
+                            ),
                             LengthLimitingTextInputFormatter(6),
                           ],
                           prefixIcon: Icons.vpn_key,
@@ -134,9 +134,9 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                           },
                           onFieldSubmitted: (_) => _joinRoom(),
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         joinRoomState.when(
                           data: (_) => SizedBox(
                             width: double.infinity,
@@ -156,9 +156,9 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         TextButton(
                           onPressed: () => context.pop(),
                           child: Text(
@@ -170,9 +170,9 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(

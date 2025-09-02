@@ -6,11 +6,8 @@ import '../../account/services/auth_service.dart';
 
 class EmotePicker extends ConsumerStatefulWidget {
   final String roomId;
-  
-  const EmotePicker({
-    required this.roomId,
-    super.key,
-  });
+
+  const EmotePicker({required this.roomId, super.key});
 
   @override
   ConsumerState<EmotePicker> createState() => _EmotePickerState();
@@ -19,16 +16,17 @@ class EmotePicker extends ConsumerStatefulWidget {
 class _EmotePickerState extends ConsumerState<EmotePicker> {
   bool _isExpanded = false;
   DateTime? _lastEmoteTime;
-  
+
   bool get _canSendEmote {
     if (_lastEmoteTime == null) return true;
-    return DateTime.now().difference(_lastEmoteTime!) > const Duration(seconds: 2);
+    return DateTime.now().difference(_lastEmoteTime!) >
+        const Duration(seconds: 2);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -104,7 +102,7 @@ class _EmotePickerState extends ConsumerState<EmotePicker> {
 
   Widget _buildEmoteButton(EmoteType type) {
     final canSend = _canSendEmote;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Material(
@@ -117,8 +115,8 @@ class _EmotePickerState extends ConsumerState<EmotePicker> {
             height: 40,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: canSend 
-                  ? Colors.transparent 
+              color: canSend
+                  ? Colors.transparent
                   : Colors.grey.withValues(alpha: 0.2),
             ),
             child: Center(
@@ -138,26 +136,26 @@ class _EmotePickerState extends ConsumerState<EmotePicker> {
 
   Future<void> _sendEmote(EmoteType type) async {
     if (!_canSendEmote) return;
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final roomService = ref.read(roomServiceProvider);
       final currentUser = await authService.getCurrentUserModel();
-      
+
       if (currentUser == null) return;
-      
+
       await roomService.sendEmote(
         roomId: widget.roomId,
         userId: currentUser.uid,
         displayName: currentUser.displayName,
         type: type,
       );
-      
+
       setState(() {
         _lastEmoteTime = DateTime.now();
         _isExpanded = false;
       });
-      
+
       // Show feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

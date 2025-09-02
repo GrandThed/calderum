@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum CalderumButtonStyle {
-  primary,
-  secondary,
-  danger,
-  outlined,
-}
+enum CalderumButtonStyle { primary, secondary, danger, outlined }
 
 class CalderumButton extends StatelessWidget {
   final String text;
@@ -60,7 +55,7 @@ class CalderumButton extends StatelessWidget {
           );
 
     final theme = Theme.of(context);
-    
+
     switch (style) {
       case CalderumButtonStyle.outlined:
         return SizedBox(
@@ -69,10 +64,7 @@ class CalderumButton extends StatelessWidget {
           child: OutlinedButton(
             onPressed: isLoading ? null : onPressed,
             style: OutlinedButton.styleFrom(
-              side: BorderSide(
-                color: theme.colorScheme.primary,
-                width: 2,
-              ),
+              side: BorderSide(color: theme.colorScheme.primary, width: 2),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -80,7 +72,7 @@ class CalderumButton extends StatelessWidget {
             child: child,
           ),
         );
-      
+
       case CalderumButtonStyle.secondary:
         return SizedBox(
           width: width,
@@ -98,7 +90,7 @@ class CalderumButton extends StatelessWidget {
             child: child,
           ),
         );
-      
+
       case CalderumButtonStyle.danger:
         return SizedBox(
           width: width,
@@ -116,7 +108,7 @@ class CalderumButton extends StatelessWidget {
             child: child,
           ),
         );
-      
+
       case CalderumButtonStyle.primary:
         return SizedBox(
           width: width,

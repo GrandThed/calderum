@@ -254,7 +254,10 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             value: user.displayName,
                           ),
                           const SizedBox(height: 12),
-                          _InfoRow(label: 'Email', value: user.email ?? 'Not provided'),
+                          _InfoRow(
+                            label: 'Email',
+                            value: user.email ?? 'Not provided',
+                          ),
                           if (user.createdAt != null) ...[
                             const SizedBox(height: 12),
                             _InfoRow(
@@ -362,7 +365,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   onPressed: () async {
                     // Store context and navigator
                     final scaffoldMessenger = ScaffoldMessenger.of(context);
-                    
+
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
@@ -389,7 +392,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         ],
                       ),
                     );
-                    
+
                     // Check mounted after async gap
                     if (!mounted) return;
 

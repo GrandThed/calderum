@@ -14,14 +14,18 @@ class SendFriendRequest extends _$SendFriendRequest {
     return const AsyncValue.data(null);
   }
 
-  Future<void> sendRequest(String toUserId, String toDisplayName, [String? toPhotoUrl]) async {
+  Future<void> sendRequest(
+    String toUserId,
+    String toDisplayName, [
+    String? toPhotoUrl,
+  ]) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final friendsService = ref.read(friendsServiceProvider);
       final currentUser = await authService.getCurrentUserModel();
-      
+
       if (currentUser == null) {
         throw 'User not authenticated';
       }
@@ -49,7 +53,7 @@ class FriendRequestAction extends _$FriendRequestAction {
 
   Future<void> acceptRequest(String requestId) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final friendsService = ref.read(friendsServiceProvider);
       await friendsService.acceptFriendRequest(requestId);
@@ -61,7 +65,7 @@ class FriendRequestAction extends _$FriendRequestAction {
 
   Future<void> rejectRequest(String requestId) async {
     state = const AsyncValue.loading();
-    
+
     try {
       final friendsService = ref.read(friendsServiceProvider);
       await friendsService.rejectFriendRequest(requestId);
@@ -86,7 +90,7 @@ class UserSearch extends _$UserSearch {
     }
 
     state = const AsyncValue.loading();
-    
+
     try {
       final friendsService = ref.read(friendsServiceProvider);
       final users = await friendsService.searchUsers(query);
@@ -104,13 +108,19 @@ Stream<List<FriendModel>> friendsStream(Ref ref, String userId) {
 }
 
 @riverpod
-Stream<List<FriendRequestModel>> incomingRequestsStream(Ref ref, String userId) {
+Stream<List<FriendRequestModel>> incomingRequestsStream(
+  Ref ref,
+  String userId,
+) {
   final friendsService = ref.watch(friendsServiceProvider);
   return friendsService.streamIncomingRequests(userId);
 }
 
 @riverpod
-Stream<List<FriendRequestModel>> outgoingRequestsStream(Ref ref, String userId) {
+Stream<List<FriendRequestModel>> outgoingRequestsStream(
+  Ref ref,
+  String userId,
+) {
   final friendsService = ref.watch(friendsServiceProvider);
   return friendsService.streamOutgoingRequests(userId);
 }

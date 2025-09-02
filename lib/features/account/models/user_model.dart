@@ -23,5 +23,6 @@ class UserModel with _$UserModel {
 }
 
 extension UserModelExtension on UserModel {
-  String get displayNameFormatted => isAnonymous ? '$displayName (Anonymous)' : displayName;
+  String get displayNameFormatted =>
+      isAnonymous ? '$displayName (Anonymous)' : displayName;
 }

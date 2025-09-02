@@ -6,22 +6,22 @@ import '../constants/ingredient_assets.dart';
 class IngredientIcon extends StatelessWidget {
   /// The ingredient type to display
   final IngredientType ingredient;
-  
+
   /// The size of the icon (width and height)
   final double size;
-  
+
   /// Optional color filter to apply to the SVG
   final Color? color;
-  
+
   /// Whether to show a circular background
   final bool showBackground;
-  
+
   /// Background color when showBackground is true
   final Color? backgroundColor;
-  
+
   /// Semantic label for accessibility
   final String? semanticLabel;
-  
+
   const IngredientIcon({
     super.key,
     required this.ingredient,
@@ -31,18 +31,19 @@ class IngredientIcon extends StatelessWidget {
     this.backgroundColor,
     this.semanticLabel,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectiveBackgroundColor = backgroundColor ?? 
+    final effectiveBackgroundColor =
+        backgroundColor ??
         Color(ingredient.primaryColorValue).withValues(alpha: 0.1);
-    
+
     Widget svgIcon = SvgPicture.asset(
       ingredient.assetPath,
       width: size,
       height: size,
-      colorFilter: color != null 
+      colorFilter: color != null
           ? ColorFilter.mode(color!, BlendMode.srcIn)
           : null,
       semanticsLabel: semanticLabel ?? ingredient.displayName,
@@ -60,7 +61,7 @@ class IngredientIcon extends StatelessWidget {
         ),
       ),
     );
-    
+
     if (showBackground) {
       return Container(
         width: size,
@@ -78,7 +79,7 @@ class IngredientIcon extends StatelessWidget {
             ingredient.assetPath,
             width: size * 0.7,
             height: size * 0.7,
-            colorFilter: color != null 
+            colorFilter: color != null
                 ? ColorFilter.mode(color!, BlendMode.srcIn)
                 : null,
             semanticsLabel: semanticLabel ?? ingredient.displayName,
@@ -86,7 +87,7 @@ class IngredientIcon extends StatelessWidget {
         ),
       );
     }
-    
+
     return svgIcon;
   }
 }
@@ -95,22 +96,22 @@ class IngredientIcon extends StatelessWidget {
 class IngredientChip extends StatelessWidget {
   /// The ingredient type to display
   final IngredientType ingredient;
-  
+
   /// The size of the chip
   final double size;
-  
+
   /// Whether the chip is selected/active
   final bool isSelected;
-  
+
   /// Callback when the chip is tapped
   final VoidCallback? onTap;
-  
+
   /// Optional count to display on the chip
   final int? count;
-  
+
   /// Whether the chip is disabled
   final bool disabled;
-  
+
   const IngredientChip({
     super.key,
     required this.ingredient,
@@ -120,17 +121,18 @@ class IngredientChip extends StatelessWidget {
     this.count,
     this.disabled = false,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryColor = Color(ingredient.primaryColorValue);
-    
+
     return Semantics(
       button: true,
       enabled: !disabled,
       selected: isSelected,
-      label: '${ingredient.displayName}${count != null ? ', count: $count' : ''}',
+      label:
+          '${ingredient.displayName}${count != null ? ', count: $count' : ''}',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -141,11 +143,11 @@ class IngredientChip extends StatelessWidget {
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isSelected 
+              color: isSelected
                   ? primaryColor.withValues(alpha: 0.2)
                   : theme.colorScheme.surface,
               border: Border.all(
-                color: isSelected 
+                color: isSelected
                     ? primaryColor
                     : primaryColor.withValues(alpha: 0.3),
                 width: isSelected ? 2 : 1,
@@ -214,28 +216,28 @@ class IngredientChip extends StatelessWidget {
 class IngredientGrid extends StatelessWidget {
   /// List of ingredients to display
   final List<IngredientType> ingredients;
-  
+
   /// Currently selected ingredients
   final Set<IngredientType> selectedIngredients;
-  
+
   /// Callback when an ingredient is selected/deselected
   final void Function(IngredientType ingredient)? onIngredientToggle;
-  
+
   /// Size of each ingredient chip
   final double chipSize;
-  
+
   /// Number of columns in the grid
   final int crossAxisCount;
-  
+
   /// Spacing between grid items
   final double spacing;
-  
+
   /// Whether selection is disabled
   final bool disabled;
-  
+
   /// Ingredient counts (for display)
   final Map<IngredientType, int>? ingredientCounts;
-  
+
   const IngredientGrid({
     super.key,
     required this.ingredients,
@@ -247,7 +249,7 @@ class IngredientGrid extends StatelessWidget {
     this.disabled = false,
     this.ingredientCounts,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
@@ -264,7 +266,7 @@ class IngredientGrid extends StatelessWidget {
         final ingredient = ingredients[index];
         final isSelected = selectedIngredients.contains(ingredient);
         final count = ingredientCounts?[ingredient];
-        
+
         return IngredientChip(
           ingredient: ingredient,
           size: chipSize,

@@ -20,12 +20,14 @@ class PlayerListTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isCurrentUser 
+        color: isCurrentUser
             ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
             : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: isCurrentUser
-            ? Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.5))
+            ? Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.5),
+              )
             : null,
       ),
       child: ListTile(
@@ -38,7 +40,7 @@ class PlayerListTile extends StatelessWidget {
               backgroundColor: theme.colorScheme.primaryContainer,
               child: player.photoUrl == null
                   ? Text(
-                      player.displayName.isNotEmpty 
+                      player.displayName.isNotEmpty
                           ? player.displayName[0].toUpperCase()
                           : '?',
                       style: TextStyle(
@@ -72,8 +74,10 @@ class PlayerListTile extends StatelessWidget {
               child: Text(
                 player.displayName,
                 style: TextStyle(
-                  fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
-                  color: isCurrentUser 
+                  fontWeight: isCurrentUser
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: isCurrentUser
                       ? theme.colorScheme.primary
                       : theme.colorScheme.onSurface,
                 ),
@@ -140,7 +144,7 @@ class PlayerListTile extends StatelessWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: player.isReady 
+            color: player.isReady
                 ? theme.colorScheme.primaryContainer
                 : theme.colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(16),
@@ -150,7 +154,7 @@ class PlayerListTile extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: player.isReady 
+              color: player.isReady
                   ? theme.colorScheme.onPrimaryContainer
                   : theme.colorScheme.onErrorContainer,
             ),

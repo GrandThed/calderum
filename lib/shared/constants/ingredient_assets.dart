@@ -1,7 +1,7 @@
 /// Constants for ingredient SVG assets
 class IngredientAssets {
   static const String _basePath = 'assets/images/ingredients';
-  
+
   // Individual ingredient SVG paths
   static const String whiteCherryBomb = '$_basePath/white_cherry_bomb.svg';
   static const String orangePumpkin = '$_basePath/orange_pumpkin.svg';
@@ -11,7 +11,7 @@ class IngredientAssets {
   static const String redMandrake = '$_basePath/red_mandrake.svg';
   static const String purpleDeathsHead = '$_basePath/purple_deaths_head.svg';
   static const String blackCrowSkull = '$_basePath/black_crow_skull.svg';
-  
+
   /// Map of ingredient types to their SVG asset paths
   static const Map<IngredientType, String> ingredientPaths = {
     IngredientType.white: whiteCherryBomb,
@@ -23,15 +23,15 @@ class IngredientAssets {
     IngredientType.purple: purpleDeathsHead,
     IngredientType.black: blackCrowSkull,
   };
-  
+
   /// Get SVG asset path for a specific ingredient type
   static String getAssetPath(IngredientType ingredient) {
     return ingredientPaths[ingredient] ?? whiteCherryBomb;
   }
-  
+
   /// Get all ingredient asset paths as a list
   static List<String> get allPaths => ingredientPaths.values.toList();
-  
+
   /// Get ingredient names for display
   static const Map<IngredientType, String> ingredientNames = {
     IngredientType.white: 'Cherry Bomb',
@@ -43,7 +43,7 @@ class IngredientAssets {
     IngredientType.purple: 'African Death\'s Head',
     IngredientType.black: 'Crow Skull',
   };
-  
+
   /// Get display name for ingredient type
   static String getDisplayName(IngredientType ingredient) {
     return ingredientNames[ingredient] ?? 'Unknown Ingredient';
@@ -52,24 +52,24 @@ class IngredientAssets {
 
 /// Enum representing the 8 ingredient types in Quacks of Quedlinburg
 enum IngredientType {
-  white,    // Cherry Bomb - Basic explosion ingredient
-  orange,   // Pumpkin - Scoring ingredient
-  yellow,   // Yellow Toadstool - Forward movement
-  green,    // Spider - Multiple effects
-  blue,     // Ghostly Breath - Special actions
-  red,      // Mandrake - Powerful effects
-  purple,   // African Death's Head - Advanced ingredient
-  black,    // Crow Skull - Rare ingredient
+  white, // Cherry Bomb - Basic explosion ingredient
+  orange, // Pumpkin - Scoring ingredient
+  yellow, // Yellow Toadstool - Forward movement
+  green, // Spider - Multiple effects
+  blue, // Ghostly Breath - Special actions
+  red, // Mandrake - Powerful effects
+  purple, // African Death's Head - Advanced ingredient
+  black, // Crow Skull - Rare ingredient
 }
 
 /// Extension methods for IngredientType
 extension IngredientTypeExtension on IngredientType {
   /// Get the SVG asset path for this ingredient type
   String get assetPath => IngredientAssets.getAssetPath(this);
-  
+
   /// Get the display name for this ingredient type
   String get displayName => IngredientAssets.getDisplayName(this);
-  
+
   /// Get the primary color associated with this ingredient
   int get primaryColorValue {
     switch (this) {

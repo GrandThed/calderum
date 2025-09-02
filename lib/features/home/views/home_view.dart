@@ -30,6 +30,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
     super.dispose();
   }
 
+  Future<void> _refreshRooms() async {
+    // Force refresh by invalidating the provider
+    if (ref.read(authServiceProvider).currentUser != null) {
+      ref.invalidate(userRoomsStreamProvider);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final createRoomState = ref.watch(createRoomViewModelProvider);
@@ -72,13 +79,18 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // User's Active Rooms Section
-              userRoomsAsync.when(
+        child: RefreshIndicator(
+          onRefresh: _refreshRooms,
+          color: AppTheme.primaryColor,
+          backgroundColor: AppTheme.surfaceColor,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // User's Active Rooms Section
+                userRoomsAsync.when(
                 data: (rooms) {
                   final activeRooms = rooms
                       .where(
@@ -95,11 +107,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Your Active Rooms',
-                        style: AppTheme.titleStyle.copyWith(
-                          color: Colors.white,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Your Active Rooms',
+                            style: AppTheme.titleStyle.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: _refreshRooms,
+                            icon: const Icon(Icons.refresh),
+                            color: Colors.white70,
+                            tooltip: 'Refresh rooms',
+                            iconSize: 20,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       ...activeRooms.map((room) => _buildRoomCard(room)),
@@ -283,7 +307,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   Future<void> _createRoom() async {

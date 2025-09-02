@@ -4,10 +4,7 @@ import '../models/room_model.dart';
 class RoomSettingsCard extends StatelessWidget {
   final RoomSettingsModel settings;
 
-  const RoomSettingsCard({
-    required this.settings,
-    super.key,
-  });
+  const RoomSettingsCard({required this.settings, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +19,7 @@ class RoomSettingsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.settings,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.settings, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Game Settings',
@@ -37,14 +31,16 @@ class RoomSettingsCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Game settings - using flexible layout instead of fixed grid
             Wrap(
               spacing: 12,
               runSpacing: 12,
               children: [
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 80) / 2, // Account for padding and spacing
+                  width:
+                      (MediaQuery.of(context).size.width - 80) /
+                      2, // Account for padding and spacing
                   child: _buildSettingTile(
                     icon: Icons.people,
                     label: 'Players',
@@ -72,7 +68,6 @@ class RoomSettingsCard extends StatelessWidget {
                 ),
               ],
             ),
-            
           ],
         ),
       ),
@@ -93,11 +88,7 @@ class RoomSettingsCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: theme.colorScheme.primary,
-            size: 20,
-          ),
+          Icon(icon, color: theme.colorScheme.primary, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -124,7 +115,6 @@ class RoomSettingsCard extends StatelessWidget {
       ),
     );
   }
-
 
   IconData _getIngredientSetIcon(IngredientSet set) {
     switch (set) {

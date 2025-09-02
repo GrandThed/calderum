@@ -9,10 +9,7 @@ import '../../../shared/theme/app_theme.dart';
 class FriendInviteDialog extends ConsumerStatefulWidget {
   final String roomCode;
 
-  const FriendInviteDialog({
-    required this.roomCode,
-    super.key,
-  });
+  const FriendInviteDialog({required this.roomCode, super.key});
 
   @override
   ConsumerState<FriendInviteDialog> createState() => _FriendInviteDialogState();
@@ -45,10 +42,7 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
       backgroundColor: AppTheme.surfaceColor,
       title: Row(
         children: [
-          Icon(
-            Icons.group_add,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.group_add, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Text(
             'Invite Friends',
@@ -75,10 +69,7 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.vpn_key,
-                        color: theme.colorScheme.primary,
-                      ),
+                      Icon(Icons.vpn_key, color: theme.colorScheme.primary),
                       const SizedBox(width: 8),
                       Text(
                         'Room Code: ${widget.roomCode}',
@@ -147,7 +138,7 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
 
   Widget _buildFriendsTab(String userId) {
     final friendsAsync = ref.watch(friendsStreamProvider(userId));
-    
+
     return friendsAsync.when(
       data: (friends) {
         if (friends.isEmpty) {
@@ -155,23 +146,19 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.people_outline,
-                  size: 48,
-                  color: Colors.white60,
-                ),
+                Icon(Icons.people_outline, size: 48, color: Colors.white60),
                 const SizedBox(height: 16),
                 Text(
                   'No friends yet',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white60,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(color: Colors.white60),
                 ),
                 Text(
                   'Add friends to invite them to games',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white60,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.white60),
                 ),
               ],
             ),
@@ -192,15 +179,13 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Text('Error loading friends: $error'),
-      ),
+      error: (error, _) => Center(child: Text('Error loading friends: $error')),
     );
   }
 
   Widget _buildRecentPlayersTab(String userId) {
     final recentPlayersAsync = ref.watch(recentPlayersStreamProvider(userId));
-    
+
     return recentPlayersAsync.when(
       data: (players) {
         if (players.isEmpty) {
@@ -208,23 +193,19 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.history,
-                  size: 48,
-                  color: Colors.white60,
-                ),
+                Icon(Icons.history, size: 48, color: Colors.white60),
                 const SizedBox(height: 16),
                 Text(
                   'No recent players',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white60,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(color: Colors.white60),
                 ),
                 Text(
                   'Players you\'ve recently played with will appear here',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white60,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.white60),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -246,9 +227,8 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Text('Error loading recent players: $error'),
-      ),
+      error: (error, _) =>
+          Center(child: Text('Error loading recent players: $error')),
     );
   }
 
@@ -259,7 +239,7 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
     VoidCallback onInvite,
   ) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -271,7 +251,9 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
           children: [
             CircleAvatar(
               backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-              child: photoUrl == null ? Text(displayName[0].toUpperCase()) : null,
+              child: photoUrl == null
+                  ? Text(displayName[0].toUpperCase())
+                  : null,
             ),
             if (isOnline)
               Positioned(
@@ -299,17 +281,12 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
         subtitle: isOnline
             ? Text(
                 'Online',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.green,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.green),
               )
             : null,
         trailing: IconButton(
           onPressed: onInvite,
-          icon: Icon(
-            Icons.send,
-            color: theme.colorScheme.primary,
-          ),
+          icon: Icon(Icons.send, color: theme.colorScheme.primary),
           tooltip: 'Send invitation',
         ),
       ),
@@ -328,7 +305,7 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
       'Hey ${friend.displayName}! Join my Calderum game! Room code: ${widget.roomCode}',
       subject: 'Calderum Game Invitation',
     );
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Invitation sent to ${friend.displayName}!'),
@@ -342,7 +319,7 @@ class _FriendInviteDialogState extends ConsumerState<FriendInviteDialog>
       'Hey ${player.displayName}! Join my Calderum game! Room code: ${widget.roomCode}',
       subject: 'Calderum Game Invitation',
     );
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Invitation sent to ${player.displayName}!'),

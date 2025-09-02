@@ -67,11 +67,15 @@ class CalderumTextField extends StatelessWidget {
         fillColor: AppTheme.surfaceColor.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.5)),
+          borderSide: BorderSide(
+            color: AppTheme.primaryColor.withValues(alpha: 0.5),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.5)),
+          borderSide: BorderSide(
+            color: AppTheme.primaryColor.withValues(alpha: 0.5),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

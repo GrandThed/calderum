@@ -12,7 +12,7 @@ class IngredientExamplesView extends StatefulWidget {
 
 class _IngredientExamplesViewState extends State<IngredientExamplesView> {
   Set<IngredientType> selectedIngredients = {};
-  
+
   final Map<IngredientType, int> ingredientCounts = {
     IngredientType.white: 5,
     IngredientType.orange: 3,
@@ -27,9 +27,7 @@ class _IngredientExamplesViewState extends State<IngredientExamplesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ingredient Icons Examples'),
-      ),
+      appBar: AppBar(title: const Text('Ingredient Icons Examples')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -47,10 +45,7 @@ class _IngredientExamplesViewState extends State<IngredientExamplesView> {
               children: IngredientType.values.map((ingredient) {
                 return Column(
                   children: [
-                    IngredientIcon(
-                      ingredient: ingredient,
-                      size: 48,
-                    ),
+                    IngredientIcon(ingredient: ingredient, size: 48),
                     const SizedBox(height: 4),
                     Text(
                       ingredient.displayName,
@@ -61,9 +56,9 @@ class _IngredientExamplesViewState extends State<IngredientExamplesView> {
                 );
               }).toList(),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Ingredient icons with backgrounds
             Text(
               'Icons with Backgrounds',
@@ -81,9 +76,9 @@ class _IngredientExamplesViewState extends State<IngredientExamplesView> {
                 );
               }).toList(),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Interactive ingredient chips
             Text(
               'Interactive Ingredient Chips',
@@ -111,9 +106,9 @@ class _IngredientExamplesViewState extends State<IngredientExamplesView> {
                 );
               }).toList(),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Ingredient grid
             Text(
               'Ingredient Selection Grid',
@@ -134,9 +129,9 @@ class _IngredientExamplesViewState extends State<IngredientExamplesView> {
                 });
               },
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Selected ingredients summary
             if (selectedIngredients.isNotEmpty) ...[
               Text(
@@ -154,14 +149,9 @@ class _IngredientExamplesViewState extends State<IngredientExamplesView> {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
-                            IngredientIcon(
-                              ingredient: ingredient,
-                              size: 24,
-                            ),
+                            IngredientIcon(ingredient: ingredient, size: 24),
                             const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(ingredient.displayName),
-                            ),
+                            Expanded(child: Text(ingredient.displayName)),
                             if (ingredientCounts[ingredient] != null)
                               Text('×${ingredientCounts[ingredient]}'),
                           ],
@@ -172,7 +162,7 @@ class _IngredientExamplesViewState extends State<IngredientExamplesView> {
                 ),
               ),
             ],
-            
+
             const SizedBox(height: 16),
           ],
         ),
