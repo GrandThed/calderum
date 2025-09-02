@@ -31,18 +31,22 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Future<void> _refreshRooms() async {
-    // Force refresh by invalidating the provider
-    if (ref.read(authServiceProvider).currentUser != null) {
-      ref.invalidate(userRoomsStreamProvider);
+    // Force refresh by invalidating the specific provider instance
+    final currentUser = ref.read(authServiceProvider).currentUser;
+    if (currentUser != null) {
+      ref.invalidate(userRoomsStreamProvider(currentUser.uid));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final createRoomState = ref.watch(createRoomViewModelProvider);
-    final currentUser = ref.watch(authServiceProvider).currentUser;
-    final userRoomsAsync = currentUser != null
-        ? ref.watch(userRoomsStreamProvider(currentUser.uid))
+    final authState = ref.watch(authServiceProvider);
+    final currentUser = authState.currentUser;
+    
+    // Only watch the stream if we have a stable user ID
+    final userRoomsAsync = currentUser?.uid != null
+        ? ref.watch(userRoomsStreamProvider(currentUser!.uid))
         : const AsyncValue<List<RoomModel>>.data([]);
 
     // Listen for successful room creation
@@ -92,11 +96,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 // User's Active Rooms Section
                 userRoomsAsync.when(
                 data: (rooms) {
+                  print('🏠 Home: Received ${rooms.length} total rooms');
                   final activeRooms = rooms
                       .where(
                         (room) => room.status != RoomStatus.finished,
                       )
                       .toList();
+                  
+                  print('🏠 Home: Filtered to ${activeRooms.length} active rooms');
+                  for (final room in activeRooms) {
+                    print('   - Room ${room.code}: ${room.status.name}');
+                  }
 
                   if (activeRooms.isEmpty) {
                     return const SizedBox.shrink();
@@ -134,8 +144,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     ],
                   );
                 },
-                loading: () => const SizedBox.shrink(),
-                error: (_, _) => const SizedBox.shrink(),
+                loading: () {
+                  print('🏠 Home: Room list is loading...');
+                  return const SizedBox.shrink();
+                },
+                error: (error, _) {
+                  print('🏠 Home: Room list error: $error');
+                  return const SizedBox.shrink();
+                },
               ),
 
               Container(
