@@ -338,7 +338,54 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         );
                       },
                       loading: () {
-                        return const SizedBox.shrink();
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Loading skeleton for rooms section
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 120,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            
+                            // Loading skeleton room cards
+                            ...List.generate(2, (index) => _buildLoadingRoomCard()),
+                            
+                            const SizedBox(height: 24),
+                            Container(
+                              height: 1,
+                              color: Colors.white.withValues(alpha: 0.1),
+                            ),
+                            const SizedBox(height: 24),
+                            
+                            // Create room card (still functional during loading)
+                            createRoomState.when(
+                              data: (_) => CreateRoomCard(onPressed: _createRoom),
+                              loading: () => const CreateRoomCard(
+                                onPressed: null,
+                                isLoading: true,
+                              ),
+                              error: (_, _) => CreateRoomCard(onPressed: _createRoom),
+                            ),
+                          ],
+                        );
                       },
                       error: (error, _) {
                         return const SizedBox.shrink();
@@ -459,6 +506,107 @@ class _HomeViewState extends ConsumerState<HomeView> {
     }
   }
 
+  Widget _buildLoadingRoomCard() {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      color: AppTheme.surfaceColor.withValues(alpha: 0.8),
+      elevation: 4,
+      shadowColor: AppTheme.primaryColor.withValues(alpha: 0.3),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 1200),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0.05),
+              Colors.white.withValues(alpha: 0.02),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Status icon skeleton
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              
+              // Content skeleton
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Room code skeleton
+                    Container(
+                      width: 80,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    
+                    // Status text skeleton
+                    Container(
+                      width: 120,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    
+                    // Players text skeleton
+                    Container(
+                      width: 60,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Arrow skeleton
+              Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildRoomCard(RoomModel room) {
     final isHost =
         room.hostId == ref.read(authServiceProvider).currentUser?.uid;
@@ -572,6 +720,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
         return Colors.yellow;
       case RoomStatus.finished:
         return Colors.grey;
+      default:
+        return Colors.grey; // Fallback color
     }
   }
 
@@ -585,6 +735,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
         return Icons.pause;
       case RoomStatus.finished:
         return Icons.check_circle;
+      default:
+        return Icons.help_outline; // Fallback icon
     }
   }
 
@@ -598,6 +750,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
         return 'Game paused';
       case RoomStatus.finished:
         return 'Game finished';
+      default:
+        return 'Unknown status'; // Fallback text
     }
   }
 }
