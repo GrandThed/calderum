@@ -50,12 +50,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    
     final createRoomState = ref.watch(createRoomViewModelProvider);
-    
+
     // Use the AuthViewModel which has stable auth state management
     final authState = ref.watch(authViewModelProvider);
-    
+
     // Extract user ID from auth state
     final currentUserId = authState.when(
       initial: () => null,
@@ -65,13 +64,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
       authenticated: (user) => user.uid,
       unauthenticated: () => null,
     );
-    
-    
+
     // Only watch the stream if we have a stable user ID
     final userRoomsAsync = currentUserId != null
         ? ref.watch(userRoomsStreamProvider(currentUserId))
         : const AsyncValue<List<RoomModel>>.data([]);
-    
 
     // Listen for successful room creation
     ref.listen(createRoomViewModelProvider, (previous, next) {
@@ -124,11 +121,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     return userRoomsAsync.when(
                       data: (rooms) {
                         final activeRooms = rooms
-                            .where(
-                              (room) => room.status != RoomStatus.finished,
-                            )
+                            .where((room) => room.status != RoomStatus.finished)
                             .toList();
-                        
 
                         final hasActiveRooms = activeRooms.isNotEmpty;
 
@@ -138,7 +132,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             // Active Rooms Section
                             if (hasActiveRooms) ...[
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Your Active Rooms',
@@ -155,7 +150,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              ...activeRooms.map((room) => _buildRoomCard(room)),
+                              ...activeRooms.map(
+                                (room) => _buildRoomCard(room),
+                              ),
                               const SizedBox(height: 24),
                               Divider(
                                 color: Colors.white.withValues(alpha: 0.2),
@@ -163,16 +160,20 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               ),
                               const SizedBox(height: 24),
                             ],
-                            
+
                             // "Ready to Brew?" container - only show when no active rooms
                             if (!hasActiveRooms) ...[
                               Container(
                                 padding: const EdgeInsets.all(32),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.surfaceColor.withValues(alpha: 0.5),
+                                  color: AppTheme.surfaceColor.withValues(
+                                    alpha: 0.5,
+                                  ),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                                    color: AppTheme.primaryColor.withValues(
+                                      alpha: 0.3,
+                                    ),
                                     width: 2,
                                   ),
                                 ),
@@ -184,11 +185,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       color: AppTheme.secondaryColor,
                                     ),
                                     const SizedBox(height: 20),
-                                    Text('Ready to Brew?', style: AppTheme.headlineStyle),
+                                    Text(
+                                      'Ready to Brew?',
+                                      style: AppTheme.headlineStyle,
+                                    ),
                                     const SizedBox(height: 8),
                                     Text(
                                       'Create a new brewing session or join with a room code',
-                                      style: AppTheme.bodyStyle.copyWith(color: Colors.white60),
+                                      style: AppTheme.bodyStyle.copyWith(
+                                        color: Colors.white60,
+                                      ),
                                       textAlign: TextAlign.center,
                                     ),
                                   ],
@@ -196,19 +202,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               ),
                               const SizedBox(height: 32),
                             ],
-                            
+
                             // Create Room Card
                             createRoomState.when(
-                              data: (_) => CreateRoomCard(
-                                onPressed: _createRoom,
-                              ),
+                              data: (_) =>
+                                  CreateRoomCard(onPressed: _createRoom),
                               loading: () => const CreateRoomCard(
                                 onPressed: null,
                                 isLoading: true,
                               ),
-                              error: (_, _) => CreateRoomCard(
-                                onPressed: _createRoom,
-                              ),
+                              error: (_, _) =>
+                                  CreateRoomCard(onPressed: _createRoom),
                             ),
 
                             const SizedBox(height: 24),
@@ -224,7 +228,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       label: 'Room Code',
                                       hint: 'Enter 6-digit room code',
                                       prefixIcon: Icons.vpn_key,
-                                      textCapitalization: TextCapitalization.characters,
+                                      textCapitalization:
+                                          TextCapitalization.characters,
                                       inputFormatters: [
                                         LengthLimitingTextInputFormatter(6),
                                         FilteringTextInputFormatter.allow(
@@ -251,17 +256,26 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       builder: (context, value, _) {
                                         final isEmpty = value.text.isEmpty;
                                         return AnimatedContainer(
-                                          duration: const Duration(milliseconds: 300),
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: isEmpty
-                                                ? AppTheme.secondaryColor.withValues(alpha: 0.8)
+                                                ? AppTheme.secondaryColor
+                                                      .withValues(alpha: 0.8)
                                                 : AppTheme.primaryColor,
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: (isEmpty 
-                                                    ? AppTheme.secondaryColor 
-                                                    : AppTheme.primaryColor).withValues(alpha: 0.3),
+                                                color:
+                                                    (isEmpty
+                                                            ? AppTheme
+                                                                  .secondaryColor
+                                                            : AppTheme
+                                                                  .primaryColor)
+                                                        .withValues(alpha: 0.3),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -276,8 +290,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                               child: InkWell(
                                                 onTap: isEmpty
                                                     ? _pasteFromClipboard
-                                                    : (_isJoining ? null : _joinRoom),
-                                                borderRadius: BorderRadius.circular(12),
+                                                    : (_isJoining
+                                                          ? null
+                                                          : _joinRoom),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                                 child: SizedBox(
                                                   width: 56,
                                                   height: 56,
@@ -289,15 +306,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                                             child: CircularProgressIndicator(
                                                               strokeWidth: 2,
                                                               valueColor:
-                                                                  AlwaysStoppedAnimation<Color>(
-                                                                    Colors.white,
+                                                                  AlwaysStoppedAnimation<
+                                                                    Color
+                                                                  >(
+                                                                    Colors
+                                                                        .white,
                                                                   ),
                                                             ),
                                                           )
                                                         : Icon(
                                                             isEmpty
                                                                 ? Icons.paste
-                                                                : Icons.arrow_forward,
+                                                                : Icons
+                                                                      .arrow_forward,
                                                             color: Colors.white,
                                                             size: 24,
                                                           ),
@@ -325,13 +346,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     );
                   },
                 ),
-
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 
   Future<void> _createRoom() async {
@@ -458,7 +478,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getRoomStatusColor(room.status).withValues(alpha: 0.2),
+                  color: _getRoomStatusColor(
+                    room.status,
+                  ).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -544,8 +566,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
     switch (status) {
       case RoomStatus.waiting:
         return Colors.orange;
-      case RoomStatus.starting:
-        return Colors.blue;
       case RoomStatus.inProgress:
         return Colors.green;
       case RoomStatus.paused:
@@ -559,8 +579,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
     switch (status) {
       case RoomStatus.waiting:
         return Icons.hourglass_empty;
-      case RoomStatus.starting:
-        return Icons.rocket_launch;
       case RoomStatus.inProgress:
         return Icons.play_arrow;
       case RoomStatus.paused:
@@ -574,8 +592,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
     switch (status) {
       case RoomStatus.waiting:
         return 'Waiting for players';
-      case RoomStatus.starting:
-        return 'Game starting';
       case RoomStatus.inProgress:
         return 'Game in progress';
       case RoomStatus.paused:

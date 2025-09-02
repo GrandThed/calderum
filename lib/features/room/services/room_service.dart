@@ -6,6 +6,7 @@ import '../models/room_model.dart';
 import '../models/emote_model.dart';
 import '../../account/models/user_model.dart';
 import '../../friends/services/friends_service.dart';
+import '../../game/services/game_service.dart';
 
 final roomServiceProvider = Provider<RoomService>((ref) {
   final friendsService = ref.read(friendsServiceProvider);
@@ -299,7 +300,6 @@ class RoomService {
           'status',
           whereIn: [
             RoomStatus.waiting.name,
-            RoomStatus.starting.name,
             RoomStatus.inProgress.name,
             RoomStatus.paused.name,
           ],
@@ -308,14 +308,18 @@ class RoomService {
         // .orderBy('updatedAt', descending: true)
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => RoomModel.fromJson({...doc.data(), 'id': doc.id}))
-              .where(
-                (room) => room.players.any((player) => player.userId == userId),
-              )
-              .toList()
-              // Sort in memory as a temporary workaround
-              ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)),
+          (snapshot) =>
+              snapshot.docs
+                  .map(
+                    (doc) => RoomModel.fromJson({...doc.data(), 'id': doc.id}),
+                  )
+                  .where(
+                    (room) =>
+                        room.players.any((player) => player.userId == userId),
+                  )
+                  .toList()
+                // Sort in memory as a temporary workaround
+                ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)),
         );
   }
 
@@ -486,7 +490,7 @@ class RoomService {
   }
 
   // Start game (host only)
-  Future<void> startGame(String roomId, String hostId) async {
+  Future<String> startGame(String roomId, String hostId) async {
     final doc = await _firestore.collection(_roomsCollection).doc(roomId).get();
     if (!doc.exists) throw 'Room not found';
 
@@ -499,9 +503,29 @@ class RoomService {
       throw 'Need at least ${room.settings.minPlayers} ready players to start';
     }
 
-    await _firestore.collection(_roomsCollection).doc(roomId).update({
-      'status': RoomStatus.starting.name,
-      'updatedAt': DateTime.now().toIso8601String(),
-    });
+    // Create user models for game creation
+    final userModels = room.players
+        .map(
+          (player) => UserModel(
+            uid: player.userId,
+            displayName: player.displayName,
+            photoUrl: player.photoUrl,
+            email: '', // Not needed for game creation
+            isAnonymous: true, // Default to anonymous for now
+            createdAt: player.joinedAt,
+            lastLogin: player.lastSeen ?? player.joinedAt,
+          ),
+        )
+        .toList();
+
+    // Create the game using game service
+    final gameService = GameService(_firestore);
+    final gameState = await gameService.createGameFromRoom(
+      roomId: roomId,
+      players: userModels,
+    );
+
+    // Room status is already updated to inProgress by game service
+    return gameState.gameId;
   }
 }

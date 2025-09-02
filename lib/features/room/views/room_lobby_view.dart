@@ -304,13 +304,7 @@ class RoomLobbyView extends ConsumerWidget {
                             child: CalderumButton(
                               text: '🚀 Start Game',
                               onPressed: _canStartGame(room)
-                                  ? () => ref
-                                        .read(
-                                          roomLobbyViewModelProvider(
-                                            roomId,
-                                          ).notifier,
-                                        )
-                                        .startGame()
+                                  ? () => _startGame(context, ref)
                                   : null,
                               style: CalderumButtonStyle.primary,
                             ),
@@ -373,6 +367,27 @@ class RoomLobbyView extends ConsumerWidget {
       return 'Need $needed more ready ${needed == 1 ? 'player' : 'players'} to start';
     }
     return '';
+  }
+
+  Future<void> _startGame(BuildContext context, WidgetRef ref) async {
+    try {
+      final gameId = await ref
+          .read(roomLobbyViewModelProvider(roomId).notifier)
+          .startGame();
+
+      if (gameId != null && context.mounted) {
+        context.go('/game/$gameId');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to start game: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   IconData _getIngredientSetIcon(IngredientSet set) {

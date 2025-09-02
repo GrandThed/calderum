@@ -156,7 +156,7 @@ class RoomLobbyViewModel extends _$RoomLobbyViewModel {
     }
   }
 
-  Future<void> startGame() async {
+  Future<String?> startGame() async {
     state = const AsyncValue.loading();
 
     try {
@@ -168,10 +168,12 @@ class RoomLobbyViewModel extends _$RoomLobbyViewModel {
         throw 'User not authenticated';
       }
 
-      await roomService.startGame(roomId, currentUser.uid);
+      final gameId = await roomService.startGame(roomId, currentUser.uid);
       state = const AsyncValue.data(null);
+      return gameId;
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
+      return null;
     }
   }
 
