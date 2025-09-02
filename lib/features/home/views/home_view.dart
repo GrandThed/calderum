@@ -94,9 +94,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 data: (rooms) {
                   final activeRooms = rooms
                       .where(
-                        (room) =>
-                            room.status == RoomStatus.waiting ||
-                            room.status == RoomStatus.inProgress,
+                        (room) => room.status != RoomStatus.finished,
                       )
                       .toList();
 
@@ -435,18 +433,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: room.status == RoomStatus.waiting
-                      ? Colors.orange.withValues(alpha: 0.2)
-                      : Colors.green.withValues(alpha: 0.2),
+                  color: _getRoomStatusColor(room.status).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  room.status == RoomStatus.waiting
-                      ? Icons.hourglass_empty
-                      : Icons.play_arrow,
-                  color: room.status == RoomStatus.waiting
-                      ? Colors.orange
-                      : Colors.green,
+                  _getRoomStatusIcon(room.status),
+                  color: _getRoomStatusColor(room.status),
                   size: 24,
                 ),
               ),
@@ -492,9 +484,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      room.status == RoomStatus.waiting
-                          ? 'Waiting for players'
-                          : 'Game in progress',
+                      _getRoomStatusText(room.status),
                       style: AppTheme.bodyStyle.copyWith(
                         color: Colors.white70,
                         fontSize: 12,
@@ -523,5 +513,50 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
       ),
     );
+  }
+
+  Color _getRoomStatusColor(RoomStatus status) {
+    switch (status) {
+      case RoomStatus.waiting:
+        return Colors.orange;
+      case RoomStatus.starting:
+        return Colors.blue;
+      case RoomStatus.inProgress:
+        return Colors.green;
+      case RoomStatus.paused:
+        return Colors.yellow;
+      case RoomStatus.finished:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getRoomStatusIcon(RoomStatus status) {
+    switch (status) {
+      case RoomStatus.waiting:
+        return Icons.hourglass_empty;
+      case RoomStatus.starting:
+        return Icons.rocket_launch;
+      case RoomStatus.inProgress:
+        return Icons.play_arrow;
+      case RoomStatus.paused:
+        return Icons.pause;
+      case RoomStatus.finished:
+        return Icons.check_circle;
+    }
+  }
+
+  String _getRoomStatusText(RoomStatus status) {
+    switch (status) {
+      case RoomStatus.waiting:
+        return 'Waiting for players';
+      case RoomStatus.starting:
+        return 'Game starting';
+      case RoomStatus.inProgress:
+        return 'Game in progress';
+      case RoomStatus.paused:
+        return 'Game paused';
+      case RoomStatus.finished:
+        return 'Game finished';
+    }
   }
 }
