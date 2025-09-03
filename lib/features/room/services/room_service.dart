@@ -53,20 +53,6 @@ class RoomService {
       return existingRoom;
     }
 
-    // Also check if user is already in a waiting room as a player
-    final allWaitingRooms = await _firestore
-        .collection(_roomsCollection)
-        .where('status', isEqualTo: RoomStatus.waiting.name)
-        .get();
-
-    for (final doc in allWaitingRooms.docs) {
-      final room = RoomModel.fromJson({...doc.data(), 'id': doc.id});
-      if (room.players.any((p) => p.userId == host.uid)) {
-        // User is already in a waiting room, return that room
-        return room;
-      }
-    }
-
     final roomCode = _generateRoomCode();
     final now = DateTime.now();
 
@@ -487,6 +473,38 @@ class RoomService {
     }
 
     return null;
+  }
+
+  // Delete room (host only, waiting state only)
+  Future<void> deleteRoom(String roomId, String hostId) async {
+    final doc = await _firestore.collection(_roomsCollection).doc(roomId).get();
+    if (!doc.exists) throw 'Room not found';
+
+    final room = RoomModel.fromJson({...doc.data()!, 'id': doc.id});
+
+    // Verify host permissions
+    if (room.hostId != hostId) {
+      throw 'Only the host can delete this room';
+    }
+
+    // Verify room is in waiting state
+    if (room.status != RoomStatus.waiting) {
+      throw 'Can only delete rooms that are waiting for players';
+    }
+
+    // Delete emotes subcollection first
+    final emotesDocs = await _firestore
+        .collection(_roomsCollection)
+        .doc(roomId)
+        .collection('emotes')
+        .get();
+
+    for (final emoteDoc in emotesDocs.docs) {
+      await emoteDoc.reference.delete();
+    }
+
+    // Delete the room document
+    await _firestore.collection(_roomsCollection).doc(roomId).delete();
   }
 
   // Start game (host only)

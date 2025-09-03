@@ -7,12 +7,10 @@ import '../models/room_model.dart';
 import '../viewmodels/room_viewmodel.dart';
 import '../widgets/player_list_tile.dart';
 import '../services/room_service.dart';
-import '../widgets/room_settings_dialog.dart';
 import '../../friends/widgets/friend_invite_dialog.dart';
 import '../../account/services/auth_service.dart';
 import '../../../shared/widgets/calderum_button.dart';
 import '../../../shared/widgets/calderum_app_bar.dart';
-import '../../../shared/widgets/expandable_settings_panel.dart';
 import '../../../shared/theme/room_design_system.dart';
 import '../../../shared/theme/app_theme.dart';
 
@@ -107,8 +105,8 @@ class RoomLobbyView extends ConsumerWidget {
             PopupMenuButton<String>(
               onSelected: (value) {
                 switch (value) {
-                  case 'settings':
-                    _showSettingsDialog(context, ref, room);
+                  case 'dismiss_room':
+                    _showDismissRoomConfirmation(context, ref, room);
                     break;
                   case 'kick_all':
                     _showKickAllDialog(context, ref);
@@ -116,14 +114,18 @@ class RoomLobbyView extends ConsumerWidget {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'settings',
-                  child: ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text('Room Settings'),
-                    contentPadding: EdgeInsets.zero,
+                if (room.status == RoomStatus.waiting)
+                  const PopupMenuItem(
+                    value: 'dismiss_room',
+                    child: ListTile(
+                      leading: Icon(Icons.delete_outline, color: Colors.red),
+                      title: Text(
+                        'Dismiss Room',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
                 const PopupMenuItem(
                   value: 'kick_all',
                   child: ListTile(
@@ -197,44 +199,57 @@ class RoomLobbyView extends ConsumerWidget {
 
                 const SizedBox(height: RoomDesignSystem.secondarySection),
 
-                // Room settings - expandable panel
-                ExpandableSettingsPanel(
-                  title: Row(
+                // Room settings card
+                Container(
+                  decoration: RoomDesignSystem.roomInfoCardDecoration(
+                    AppTheme.surfaceColor,
+                  ),
+                  padding: const EdgeInsets.all(RoomDesignSystem.cardPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.settings, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Room Settings',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontFamily: 'Caudex',
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.settings,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Room Settings',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontFamily: 'Caudex',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: RoomDesignSystem.spacingMd),
+
+                      SettingRow(
+                        icon: _getIngredientSetIcon(
+                          room.settings.ingredientSet,
                         ),
+                        label: 'Ingredient Set',
+                        value: _getIngredientSetName(
+                          room.settings.ingredientSet,
+                        ),
+                        canEdit: isHost && room.status == RoomStatus.waiting,
+                        onTap: () =>
+                            _showIngredientSetSelector(context, ref, room),
+                      ),
+                      const SizedBox(height: RoomDesignSystem.spacingSm),
+                      SettingRow(
+                        icon: Icons.science,
+                        label: 'Test Tube Variant',
+                        value: room.settings.testTubeVariant
+                            ? 'Enabled'
+                            : 'Disabled',
+                        canEdit: isHost && room.status == RoomStatus.waiting,
+                        onTap: () => _toggleTestTube(context, ref, room),
                       ),
                     ],
                   ),
-                  canEdit: isHost && room.status == RoomStatus.waiting,
-                  initiallyExpanded: true,
-                  children: [
-                    SettingRow(
-                      icon: _getIngredientSetIcon(room.settings.ingredientSet),
-                      label: 'Ingredient Set',
-                      value: _getIngredientSetName(room.settings.ingredientSet),
-                      canEdit: isHost && room.status == RoomStatus.waiting,
-                      onTap: () =>
-                          _showIngredientSetSelector(context, ref, room),
-                    ),
-                    const SizedBox(height: RoomDesignSystem.spacingSm),
-                    SettingRow(
-                      icon: Icons.science,
-                      label: 'Test Tube Variant',
-                      value: room.settings.testTubeVariant
-                          ? 'Enabled'
-                          : 'Disabled',
-                      canEdit: isHost && room.status == RoomStatus.waiting,
-                      onTap: () => _toggleTestTube(context, ref, room),
-                    ),
-                  ],
                 ),
 
                 const SizedBox(height: RoomDesignSystem.secondarySection),
@@ -390,6 +405,201 @@ class RoomLobbyView extends ConsumerWidget {
     }
   }
 
+  void _shareRoom(RoomModel room) {
+    Share.share(
+      'Join my Calderum game! Room code: ${room.code}',
+      subject: 'Calderum Game Invitation',
+    );
+  }
+
+  void _showInviteFriendsDialog(BuildContext context, String roomCode) {
+    showDialog(
+      context: context,
+      builder: (context) => FriendInviteDialog(roomCode: roomCode),
+    );
+  }
+
+  void _copyRoomCode(BuildContext context, String code) {
+    Clipboard.setData(ClipboardData(text: code));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Room code copied to clipboard!')),
+    );
+  }
+
+  void _showKickAllDialog(BuildContext context, WidgetRef ref) {
+    // TODO: Implement kick all dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Kick all players coming soon!')),
+    );
+  }
+
+  Future<void> _showDismissRoomConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    RoomModel room,
+  ) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => _buildDismissRoomDialog(room, context),
+    );
+
+    if (shouldDelete == true && context.mounted) {
+      await _dismissRoom(context, ref, room);
+    }
+  }
+
+  Widget _buildDismissRoomDialog(RoomModel room, BuildContext context) {
+    final otherPlayersCount = room.players.length - 1;
+
+    return AlertDialog(
+      backgroundColor: AppTheme.surfaceColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: AppTheme.primaryColor.withValues(alpha: 0.3),
+          width: 2,
+        ),
+      ),
+      title: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_outlined,
+            color: AppTheme.secondaryColor,
+            size: 28,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Dismiss Room?',
+            style: AppTheme.titleStyle.copyWith(
+              fontFamily: 'Caveat',
+              color: AppTheme.secondaryColor,
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Are you sure you want to dismiss Room ${room.code}?',
+            style: AppTheme.bodyStyle.copyWith(
+              color: Colors.white.withValues(alpha: 0.87),
+            ),
+          ),
+          if (otherPlayersCount > 0) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.people_outline, color: Colors.orange, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '$otherPlayersCount other player${otherPlayersCount == 1 ? '' : 's'} will be removed',
+                      style: AppTheme.bodyStyle.copyWith(
+                        fontSize: 14,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(
+            'Cancel',
+            style: AppTheme.bodyStyle.copyWith(
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red.withValues(alpha: 0.8),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text(
+            'Dismiss Room',
+            style: AppTheme.bodyStyle.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _dismissRoom(
+    BuildContext context,
+    WidgetRef ref,
+    RoomModel room,
+  ) async {
+    try {
+      final authService = ref.read(authServiceProvider);
+      final roomService = ref.read(roomServiceProvider);
+      final currentUser = authService.currentUser;
+
+      if (currentUser == null) {
+        throw 'User not authenticated';
+      }
+
+      await roomService.deleteRoom(room.id, currentUser.uid);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('Room ${room.code} dismissed successfully'),
+              ],
+            ),
+            backgroundColor: AppTheme.primaryColor,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        // Navigate back to home
+        context.go('/home');
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text('Failed to dismiss room: $error')),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   IconData _getIngredientSetIcon(IngredientSet set) {
     switch (set) {
       case IngredientSet.set1:
@@ -414,58 +624,6 @@ class RoomLobbyView extends ConsumerWidget {
       case IngredientSet.set4:
         return 'Set 4';
     }
-  }
-
-  void _shareRoom(RoomModel room) {
-    Share.share(
-      'Join my Calderum game! Room code: ${room.code}',
-      subject: 'Calderum Game Invitation',
-    );
-  }
-
-  void _showInviteFriendsDialog(BuildContext context, String roomCode) {
-    showDialog(
-      context: context,
-      builder: (context) => FriendInviteDialog(roomCode: roomCode),
-    );
-  }
-
-  void _copyRoomCode(BuildContext context, String code) {
-    Clipboard.setData(ClipboardData(text: code));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Room code copied to clipboard!')),
-    );
-  }
-
-  void _showSettingsDialog(
-    BuildContext context,
-    WidgetRef ref,
-    RoomModel room,
-  ) {
-    // Only allow settings changes in waiting state
-    if (room.status != RoomStatus.waiting) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Settings can only be changed while waiting for players',
-          ),
-        ),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) =>
-          RoomSettingsDialog(roomId: room.id, currentSettings: room.settings),
-    );
-  }
-
-  void _showKickAllDialog(BuildContext context, WidgetRef ref) {
-    // TODO: Implement kick all dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Kick all players coming soon!')),
-    );
   }
 
   void _showIngredientSetSelector(
@@ -498,7 +656,7 @@ class RoomLobbyView extends ConsumerWidget {
                   selected: isSelected,
                   onTap: () {
                     Navigator.pop(context);
-                    _updateIngredientSet(ref, room, set);
+                    _updateIngredientSet(context, ref, room, set);
                   },
                 ),
               );
@@ -511,10 +669,11 @@ class RoomLobbyView extends ConsumerWidget {
   }
 
   void _toggleTestTube(BuildContext context, WidgetRef ref, RoomModel room) {
-    _updateTestTube(ref, room, !room.settings.testTubeVariant);
+    _updateTestTube(context, ref, room, !room.settings.testTubeVariant);
   }
 
   Future<void> _updateIngredientSet(
+    BuildContext context,
     WidgetRef ref,
     RoomModel room,
     IngredientSet set,
@@ -527,24 +686,29 @@ class RoomLobbyView extends ConsumerWidget {
           .read(roomServiceProvider)
           .updateRoomSettings(room.id, currentUserId!, updatedSettings);
 
-      ScaffoldMessenger.of(ref.context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Ingredient set updated to ${_getIngredientSetName(set)}',
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Ingredient set updated to ${_getIngredientSetName(set)}',
+            ),
           ),
-        ),
-      );
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(ref.context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update ingredient set: $e'),
-          backgroundColor: Theme.of(ref.context).colorScheme.error,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update ingredient set: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _updateTestTube(
+    BuildContext context,
     WidgetRef ref,
     RoomModel room,
     bool hasTestTube,
@@ -559,20 +723,109 @@ class RoomLobbyView extends ConsumerWidget {
           .read(roomServiceProvider)
           .updateRoomSettings(room.id, currentUserId!, updatedSettings);
 
-      ScaffoldMessenger.of(ref.context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Test tube variant ${hasTestTube ? 'enabled' : 'disabled'}',
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Test tube variant ${hasTestTube ? 'enabled' : 'disabled'}',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update test tube variant: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+}
+
+class SettingRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool canEdit;
+  final VoidCallback? onTap;
+
+  const SettingRow({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.canEdit = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: canEdit ? onTap : null,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          decoration: BoxDecoration(
+            color: canEdit
+                ? AppTheme.primaryColor.withValues(alpha: 0.1)
+                : Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: canEdit
+                  ? AppTheme.primaryColor.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.1),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(icon, size: 18, color: AppTheme.primaryColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      value,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (canEdit) ...[
+                Icon(Icons.edit, size: 18, color: AppTheme.primaryColor),
+              ] else ...[
+                Icon(Icons.lock, size: 16, color: Colors.white38),
+              ],
+            ],
           ),
         ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(ref.context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update test tube variant: $e'),
-          backgroundColor: Theme.of(ref.context).colorScheme.error,
-        ),
-      );
-    }
+      ),
+    );
   }
 }

@@ -233,8 +233,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       inputFormatters: [
                                         LengthLimitingTextInputFormatter(6),
                                         FilteringTextInputFormatter.allow(
-                                          RegExp(r'[A-Z0-9]'),
+                                          RegExp(r'[A-Za-z0-9]'),
                                         ),
+                                        TextInputFormatter.withFunction((
+                                          oldValue,
+                                          newValue,
+                                        ) {
+                                          return newValue.copyWith(
+                                            text: newValue.text.toUpperCase(),
+                                          );
+                                        }),
                                       ],
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
@@ -364,25 +372,30 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            
+
                             // Loading skeleton room cards
-                            ...List.generate(2, (index) => _buildLoadingRoomCard()),
-                            
+                            ...List.generate(
+                              2,
+                              (index) => _buildLoadingRoomCard(),
+                            ),
+
                             const SizedBox(height: 24),
                             Container(
                               height: 1,
                               color: Colors.white.withValues(alpha: 0.1),
                             ),
                             const SizedBox(height: 24),
-                            
+
                             // Create room card (still functional during loading)
                             createRoomState.when(
-                              data: (_) => CreateRoomCard(onPressed: _createRoom),
+                              data: (_) =>
+                                  CreateRoomCard(onPressed: _createRoom),
                               loading: () => const CreateRoomCard(
                                 onPressed: null,
                                 isLoading: true,
                               ),
-                              error: (_, _) => CreateRoomCard(onPressed: _createRoom),
+                              error: (_, _) =>
+                                  CreateRoomCard(onPressed: _createRoom),
                             ),
                           ],
                         );
@@ -443,6 +456,161 @@ class _HomeViewState extends ConsumerState<HomeView> {
     } finally {
       if (mounted) {
         setState(() => _isJoining = false);
+      }
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(RoomModel room) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => _buildDeleteConfirmationDialog(room),
+    );
+
+    if (shouldDelete == true) {
+      await _deleteRoom(room);
+    }
+  }
+
+  Widget _buildDeleteConfirmationDialog(RoomModel room) {
+    final otherPlayersCount = room.players.length - 1;
+
+    return AlertDialog(
+      backgroundColor: AppTheme.surfaceColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: AppTheme.primaryColor.withValues(alpha: 0.3),
+          width: 2,
+        ),
+      ),
+      title: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_outlined,
+            color: AppTheme.secondaryColor,
+            size: 28,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Dismiss Room?',
+            style: AppTheme.titleStyle.copyWith(
+              fontFamily: 'Caveat',
+              color: AppTheme.secondaryColor,
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Are you sure you want to dismiss Room ${room.code}?',
+            style: AppTheme.bodyStyle.copyWith(
+              color: Colors.white.withValues(alpha: 0.87),
+            ),
+          ),
+          if (otherPlayersCount > 0) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.people_outline, color: Colors.orange, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '$otherPlayersCount other player${otherPlayersCount == 1 ? '' : 's'} will be removed',
+                      style: AppTheme.bodyStyle.copyWith(
+                        fontSize: 14,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(
+            'Cancel',
+            style: AppTheme.bodyStyle.copyWith(color: Colors.white70),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red.withValues(alpha: 0.8),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text(
+            'Dismiss Room',
+            style: AppTheme.bodyStyle.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _deleteRoom(RoomModel room) async {
+    try {
+      final authService = ref.read(authServiceProvider);
+      final roomService = ref.read(roomServiceProvider);
+      final currentUser = authService.currentUser;
+
+      if (currentUser == null) {
+        throw 'User not authenticated';
+      }
+
+      await roomService.deleteRoom(room.id, currentUser.uid);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('Room ${room.code} dismissed successfully'),
+              ],
+            ),
+            backgroundColor: AppTheme.primaryColor,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text('Failed to dismiss room: $error')),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -550,7 +718,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
               const SizedBox(width: 16),
-              
+
               // Content skeleton
               Expanded(
                 child: Column(
@@ -566,7 +734,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    
+
                     // Status text skeleton
                     Container(
                       width: 120,
@@ -577,7 +745,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    
+
                     // Players text skeleton
                     Container(
                       width: 60,
@@ -590,7 +758,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   ],
                 ),
               ),
-              
+
               // Arrow skeleton
               Container(
                 width: 16,
@@ -612,12 +780,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
         room.hostId == ref.read(authServiceProvider).currentUser?.uid;
     final playerCount = room.players.length;
     final maxPlayers = room.settings.maxPlayers;
+    final canDelete = isHost && room.status == RoomStatus.waiting;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: AppTheme.surfaceColor.withValues(alpha: 0.8),
       child: InkWell(
         onTap: () => context.go('/room/${room.id}'),
+        onLongPress: canDelete ? () => _showDeleteConfirmation(room) : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
