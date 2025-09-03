@@ -6,6 +6,8 @@ import '../models/game_state_model.dart';
 import '../models/ingredient_model.dart';
 import '../../account/models/user_model.dart';
 import '../../room/models/room_model.dart';
+import 'scoring_service.dart';
+import 'explosion_service.dart';
 
 final gameServiceProvider = Provider<GameService>((ref) {
   return GameService(FirebaseFirestore.instance);
@@ -162,6 +164,15 @@ class GameService {
       throw 'Invalid position: $position';
     }
 
+    // Check if placing this chip would cause explosion
+    if (ExplosionService.wouldCauseExplosion(
+      player.potState.placedChips,
+      chip,
+    )) {
+      // Allow placement but mark as explosion risk
+      // Player may still choose to place it (push your luck mechanic)
+    }
+
     // Update chip to be on board
     final placedChip = chip.copyWith(
       isOnBoard: true,
@@ -173,10 +184,12 @@ class GameService {
       placedChips: [...player.potState.placedChips, placedChip],
     );
 
-    // Check for explosion
-    final hasExploded = updatedPotState.whiteChipTotal > 7;
-    if (hasExploded) {
-      updatedPotState = updatedPotState.copyWith(hasExploded: true);
+    // Check for explosion using explosion service
+    if (ExplosionService.hasExploded(updatedPotState.placedChips)) {
+      updatedPotState = ExplosionService.applyExplosionEffects(
+        currentPotState: updatedPotState,
+        currentRound: state.currentTurn,
+      );
     }
 
     // Update bag (remove from drawn this turn)
@@ -489,6 +502,164 @@ class GameService {
     updatedPlayers[playerIndex] = updatedPlayer;
 
     return state.copyWith(players: updatedPlayers, updatedAt: DateTime.now());
+  }
+
+  /// Calculate scores for all players (Evaluation D - Victory Points)
+  Future<GameState> calculateScores(String gameId, int ingredientSet) async {
+    final state = await getGameById(gameId);
+    if (state == null) throw 'Game not found';
+
+    final updatedPlayers = state.players.map((player) {
+      // Skip scoring if pot exploded (they choose coins OR points, not both)
+      if (player.potState.hasExploded) {
+        return player; // No automatic scoring for exploded pots
+      }
+
+      // Calculate final score using scoring service
+      final scoreResult = ScoringService.calculateFinalScore(
+        placedChips: player.potState.placedChips,
+        finalPosition: player.potState.scoringPosition,
+        currentRound: state.currentTurn,
+        ingredientSet: ingredientSet,
+        receivedBonusDie: state.bonusDieWinners.contains(player.userId),
+        bonusDieResult: 0, // TODO: Track actual bonus die result
+        previousVictoryPoints: player.potState.victoryPoints,
+        rubies: player.potState.rubies,
+      );
+
+      // Update player with new scores
+      final updatedPotState = player.potState.copyWith(
+        victoryPoints: scoreResult['totalVictoryPoints'] as int,
+        coins: scoreResult['coins'] as int,
+        rubies: scoreResult['rubies'] as int,
+      );
+
+      return player.copyWith(
+        potState: updatedPotState,
+        lastAction: DateTime.now(),
+      );
+    }).toList();
+
+    final updatedState = state.copyWith(
+      players: updatedPlayers,
+      updatedAt: DateTime.now(),
+    );
+
+    // Save updated state
+    await _firestore
+        .collection(_gamesCollection)
+        .doc(gameId)
+        .update(updatedState.toJson());
+
+    return updatedState;
+  }
+
+  /// Roll bonus die for eligible players (Evaluation A)
+  Future<GameState> rollBonusDie(String gameId) async {
+    final state = await getGameById(gameId);
+    if (state == null) throw 'Game not found';
+
+    final eligiblePlayers = state.bonusDieEligiblePlayers;
+    final random = Random();
+
+    // Roll bonus die for each eligible player
+    final bonusDieResults = <String, int>{};
+    for (final player in eligiblePlayers) {
+      bonusDieResults[player.userId] = random.nextInt(6) + 1;
+    }
+
+    final updatedPlayers = state.players.map((player) {
+      if (bonusDieResults.containsKey(player.userId)) {
+        final dieResult = bonusDieResults[player.userId]!;
+        var updatedPotState = player.potState;
+
+        // Apply bonus die effects
+        switch (dieResult) {
+          case 1:
+            updatedPotState = updatedPotState.copyWith(
+              victoryPoints: updatedPotState.victoryPoints + 1,
+            );
+            break;
+          case 2:
+            updatedPotState = updatedPotState.copyWith(
+              victoryPoints: updatedPotState.victoryPoints + 2,
+            );
+            break;
+          case 3:
+            updatedPotState = updatedPotState.copyWith(
+              rubies: updatedPotState.rubies + 1,
+            );
+            break;
+          case 4:
+            // Add orange chip to bag (handled in ingredient bag update)
+            break;
+          case 5:
+            updatedPotState = updatedPotState.copyWith(
+              dropletPosition: (updatedPotState.dropletPosition + 1).clamp(
+                0,
+                33,
+              ),
+            );
+            break;
+          case 6:
+            // Special effect based on Fortune Teller card
+            // TODO: Implement Fortune Teller specific effects
+            break;
+        }
+
+        return player.copyWith(
+          potState: updatedPotState,
+          lastAction: DateTime.now(),
+        );
+      }
+      return player;
+    }).toList();
+
+    final updatedState = state.copyWith(
+      players: updatedPlayers,
+      bonusDieWinners: bonusDieResults.keys.toList(),
+      updatedAt: DateTime.now(),
+    );
+
+    // Save updated state
+    await _firestore
+        .collection(_gamesCollection)
+        .doc(gameId)
+        .update(updatedState.toJson());
+
+    return updatedState;
+  }
+
+  /// Award rubies to players on ruby spaces (Evaluation C)
+  Future<GameState> awardRubies(String gameId) async {
+    final state = await getGameById(gameId);
+    if (state == null) throw 'Game not found';
+
+    final updatedPlayers = state.players.map((player) {
+      if (ScoringService.isRubySpace(player.potState.scoringPosition)) {
+        final updatedPotState = player.potState.copyWith(
+          rubies: player.potState.rubies + 1,
+        );
+        return player.copyWith(
+          potState: updatedPotState,
+          lastAction: DateTime.now(),
+        );
+      }
+      return player;
+    }).toList();
+
+    final updatedState = state.copyWith(
+      players: updatedPlayers,
+      updatedAt: DateTime.now(),
+    );
+
+    // Save updated state
+    await _firestore
+        .collection(_gamesCollection)
+        .doc(gameId)
+        .update(updatedState.toJson());
+
+    return updatedState;
   }
 
   /// Calculate rats positions (catch-up mechanic)
