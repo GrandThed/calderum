@@ -63,7 +63,7 @@
       "Bash(where sqlite3)",
       "Bash(git push:*)",
       "Bash(flutter analyze:*)",
-      "Bash(flutter run:*)",
+      
       "WebFetch(domain:github.com)",
       "WebFetch(domain:medium.com)",
       "Bash(git clone:*)",
@@ -108,7 +108,9 @@
       "mcp__dart-mcp__analyze_files",
       "WebFetch(domain:stackoverflow.com)"
     ],
-    "deny": [],
+    "deny": [
+      "Bash(flutter run:*)"
+    ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
       "C:"
