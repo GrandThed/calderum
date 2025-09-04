@@ -91,14 +91,11 @@ class RoomService {
     required String roomCode,
     required UserModel user,
   }) async {
-    // Find room by code
+    // Find room by code - only allow joining waiting rooms
     final querySnapshot = await _firestore
         .collection(_roomsCollection)
         .where('code', isEqualTo: roomCode.toUpperCase())
-        .where(
-          'status',
-          whereIn: [RoomStatus.waiting.name, RoomStatus.inProgress.name],
-        )
+        .where('status', isEqualTo: RoomStatus.waiting.name)
         .limit(1)
         .get();
 
@@ -115,15 +112,14 @@ class RoomService {
       return await _updatePlayerStatus(room.id, user.uid, isOnline: true);
     }
 
+    // Validate room can be joined
+    if (room.status != RoomStatus.waiting) {
+      throw 'Cannot join room - game is not waiting for players';
+    }
+    
     // Check room capacity
     if (room.players.length >= room.settings.maxPlayers) {
       throw 'Room is full (${room.players.length}/${room.settings.maxPlayers} players)';
-    }
-
-    // Check if mid-game joins are allowed
-    if (room.status == RoomStatus.inProgress &&
-        !room.settings.allowMidGameJoins) {
-      throw 'Cannot join room - game is in progress';
     }
 
     // Add player to room
@@ -505,11 +501,16 @@ class RoomService {
 
     final room = RoomModel.fromJson({...doc.data()!, 'id': doc.id});
     if (room.hostId != hostId) throw 'Only the host can start the game';
+    
+    // Check if game is already in progress
+    if (room.status == RoomStatus.inProgress) {
+      throw 'Game is already in progress';
+    }
 
-    // Check minimum players - allow starting with at least 1 ready player
+    // Check minimum players - require at least 2 ready players
     final readyPlayers = room.players.where((p) => p.isReady).length;
-    if (readyPlayers < 1) {
-      throw 'Need at least 1 ready player to start';
+    if (readyPlayers < 2) {
+      throw 'Need at least 2 ready players to start';
     }
 
     // Create user models for game creation

@@ -48,7 +48,7 @@ class GameService {
     // Update room status to in_progress
     await _firestore.collection('rooms').doc(roomId).update({
       'status': RoomStatus.inProgress.name,
-      'gameId': gameId,
+      'currentGameId': gameId,
       'updatedAt': DateTime.now().toIso8601String(),
     });
 

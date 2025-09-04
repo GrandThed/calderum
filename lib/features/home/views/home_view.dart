@@ -89,7 +89,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         data: (room) {
           if (room != null) {
             // Navigate to the created room immediately
-            context.push('/room/${room.id}');
+            _navigateToRoom(room);
           }
         },
         loading: () {},
@@ -285,7 +285,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
       if (mounted) {
         // Navigate to the joined room
-        context.push('/room/${room.id}');
+        _navigateToRoom(room);
       }
     } catch (error) {
       if (mounted) {
@@ -797,7 +797,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       margin: const EdgeInsets.only(bottom: 12),
       color: AppTheme.surfaceColor.withValues(alpha: 0.8),
       child: InkWell(
-        onTap: () => context.push('/room/${room.id}'),
+        onTap: () => _navigateToRoom(room),
         onLongPress: canDelete ? () => _showDeleteConfirmation(room) : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -889,6 +889,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
       ),
     );
+  }
+
+  void _navigateToRoom(RoomModel room) {
+    // Navigate directly to game if room is in progress
+    if (room.status == RoomStatus.inProgress && room.currentGameId != null) {
+      context.push('/game/${room.currentGameId}');
+    } else {
+      // Navigate to room lobby for waiting rooms
+      context.push('/room/${room.id}');
+    }
   }
 
   Color _getRoomStatusColor(RoomStatus status) {

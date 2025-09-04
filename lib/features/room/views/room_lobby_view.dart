@@ -38,12 +38,12 @@ class RoomLobbyView extends ConsumerWidget {
       );
     });
 
-    // Listen for room status changes and navigate to game when started
+    // Listen for room status and navigate to game if room is inProgress
     ref.listen(roomStreamProvider(roomId), (previous, next) {
       next.whenOrNull(
         data: (room) {
+          // Always navigate to game if room is inProgress (regardless of previous state)
           if (room.status == RoomStatus.inProgress && room.currentGameId != null) {
-            // Navigate all players to the game screen when game starts, replacing room in stack
             context.go('/game/${room.currentGameId}');
           }
         },
@@ -52,16 +52,20 @@ class RoomLobbyView extends ConsumerWidget {
 
     return roomAsync.when(
       data: (room) {
-        // If room has active game, go to game directly
+        // If room has active game, show loading while listener handles navigation
         if (room.status == RoomStatus.inProgress && room.currentGameId != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              context.go('/game/${room.currentGameId}');
-            }
-          });
           return Scaffold(
-            appBar: const CalderumAppBar(title: '🎮 Game Active'),
-            body: const Center(child: CircularProgressIndicator()),
+            appBar: const CalderumAppBar(title: '🎮 Joining Game...'),
+            body: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Game in progress, joining...'),
+                ],
+              ),
+            ),
           );
         }
         return _buildLobby(context, ref, room, lobbyState);
@@ -396,14 +400,22 @@ class RoomLobbyView extends ConsumerWidget {
   }
 
   bool _canStartGame(RoomModel room) {
+    // Can't start if game is already in progress
+    if (room.status == RoomStatus.inProgress) return false;
+    
     final readyPlayers = room.players.where((p) => p.isReady).length;
-    return readyPlayers >= room.settings.minPlayers;
+    return readyPlayers >= 2; // Require at least 2 ready players to start
   }
 
   String _getStartGameMessage(RoomModel room) {
+    // If game is already in progress, show different message
+    if (room.status == RoomStatus.inProgress) {
+      return 'Game is already in progress';
+    }
+    
     final readyPlayers = room.players.where((p) => p.isReady).length;
-    final needed = room.settings.minPlayers - readyPlayers;
-
+    final needed = 2 - readyPlayers;
+    
     if (needed > 0) {
       return 'Need $needed more ready ${needed == 1 ? 'player' : 'players'} to start';
     }
