@@ -905,8 +905,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
         return Icons.pause;
       case RoomStatus.finished:
         return Icons.check_circle;
-      default:
-        return Icons.help_outline; // Fallback icon
     }
   }
 
@@ -920,8 +918,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
         return 'Game paused';
       case RoomStatus.finished:
         return 'Game finished';
-      default:
-        return 'Unknown status'; // Fallback text
     }
   }
 }
