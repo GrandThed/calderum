@@ -63,7 +63,6 @@
       "Bash(where sqlite3)",
       "Bash(git push:*)",
       "Bash(flutter analyze:*)",
-      
       "WebFetch(domain:github.com)",
       "WebFetch(domain:medium.com)",
       "Bash(git clone:*)",

@@ -7,6 +7,7 @@ import '../models/emote_model.dart';
 import '../../account/models/user_model.dart';
 import '../../friends/services/friends_service.dart';
 import '../../game/services/game_service.dart';
+import '../../../shared/utils/json_converter.dart';
 
 final roomServiceProvider = Provider<RoomService>((ref) {
   final friendsService = ref.read(friendsServiceProvider);
@@ -78,19 +79,9 @@ class RoomService {
       updatedAt: now,
     );
 
-    final roomJson = room.toJson();
-
-    // Manually serialize nested objects to ensure proper JSON conversion
-    final playersJson = room.players.map((player) => player.toJson()).toList();
-    final settingsJson = room.settings.toJson();
-
-    final correctedRoomJson = Map<String, dynamic>.from(roomJson);
-    correctedRoomJson['players'] = playersJson;
-    correctedRoomJson['settings'] = settingsJson;
-
     final docRef = await _firestore
         .collection(_roomsCollection)
-        .add(correctedRoomJson);
+        .add(JsonConverter.toFirestoreJson(room));
 
     return room.copyWith(id: docRef.id);
   }
@@ -515,10 +506,10 @@ class RoomService {
     final room = RoomModel.fromJson({...doc.data()!, 'id': doc.id});
     if (room.hostId != hostId) throw 'Only the host can start the game';
 
-    // Check minimum players
+    // Check minimum players - allow starting with at least 1 ready player
     final readyPlayers = room.players.where((p) => p.isReady).length;
-    if (readyPlayers < room.settings.minPlayers) {
-      throw 'Need at least ${room.settings.minPlayers} ready players to start';
+    if (readyPlayers < 1) {
+      throw 'Need at least 1 ready player to start';
     }
 
     // Create user models for game creation

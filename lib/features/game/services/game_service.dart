@@ -6,6 +6,7 @@ import '../models/game_state_model.dart';
 import '../models/ingredient_model.dart';
 import '../../account/models/user_model.dart';
 import '../../room/models/room_model.dart';
+import '../../../shared/utils/json_converter.dart';
 import 'scoring_service.dart';
 import 'explosion_service.dart';
 
@@ -32,11 +33,17 @@ class GameService {
       roomPlayers: players,
     );
 
-    // Save to Firestore
-    await _firestore
-        .collection(_gamesCollection)
-        .doc(gameId)
-        .set(gameState.toJson());
+    // Save to Firestore with proper JSON conversion
+    try {
+      await _firestore
+          .collection(_gamesCollection)
+          .doc(gameId)
+          .set(JsonConverter.toFirestoreJson(gameState));
+    } catch (e, stackTrace) {
+      print('Error saving game state: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
 
     // Update room status to in_progress
     await _firestore.collection('rooms').doc(roomId).update({
@@ -77,7 +84,7 @@ class GameService {
     await _firestore
         .collection(_gamesCollection)
         .doc(gameId)
-        .update(newState.toJson());
+        .update(JsonConverter.toFirestoreJson(newState));
 
     return newState;
   }
@@ -549,7 +556,7 @@ class GameService {
     await _firestore
         .collection(_gamesCollection)
         .doc(gameId)
-        .update(updatedState.toJson());
+        .update(JsonConverter.toFirestoreJson(updatedState));
 
     return updatedState;
   }
@@ -625,7 +632,7 @@ class GameService {
     await _firestore
         .collection(_gamesCollection)
         .doc(gameId)
-        .update(updatedState.toJson());
+        .update(JsonConverter.toFirestoreJson(updatedState));
 
     return updatedState;
   }
@@ -657,7 +664,7 @@ class GameService {
     await _firestore
         .collection(_gamesCollection)
         .doc(gameId)
-        .update(updatedState.toJson());
+        .update(JsonConverter.toFirestoreJson(updatedState));
 
     return updatedState;
   }
@@ -701,7 +708,7 @@ class GameService {
     await _firestore
         .collection(_gamesCollection)
         .doc(gameId)
-        .update(updatedState.toJson());
+        .update(JsonConverter.toFirestoreJson(updatedState));
 
     return updatedState;
   }

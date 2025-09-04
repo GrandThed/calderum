@@ -63,6 +63,7 @@ class GameBoardView extends ConsumerWidget {
             title:
                 'Turn ${state.currentTurn} - ${state.currentPhase.displayName}',
             showBackButton: true,
+            onBackPressed: () => context.go('/home'),
             actions: [
               if (isHostValue && state.allPlayersReady)
                 IconButton(

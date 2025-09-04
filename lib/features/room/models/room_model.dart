@@ -57,12 +57,12 @@ class RoomSettingsModel with _$RoomSettingsModel {
 enum RoomStatus {
   @JsonValue('waiting')
   waiting,
-  @JsonValue('in_progress')
+  @JsonValue('inProgress')
   inProgress,
   @JsonValue('paused')
   paused,
   @JsonValue('finished')
-  finished,
+  finished;
 }
 
 enum IngredientSet {

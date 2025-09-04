@@ -9,11 +9,10 @@ part 'auth_viewmodel.g.dart';
 
 @riverpod
 class AuthViewModel extends _$AuthViewModel {
-  late final AuthService _authService;
+  AuthService get _authService => ref.read(authServiceProvider);
 
   @override
   AuthState build() {
-    _authService = ref.watch(authServiceProvider);
 
     ref.listen(authStateStreamProvider, (previous, next) {
       next.when(
@@ -51,7 +50,9 @@ class AuthViewModel extends _$AuthViewModel {
       );
     });
 
-    return const AuthState.initial();
+    // Start with loading state instead of initial state
+    // since we're immediately going to check auth status
+    return const AuthState.loading();
   }
 
   Future<void> signIn({required String email, required String password}) async {

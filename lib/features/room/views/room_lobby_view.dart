@@ -38,8 +38,34 @@ class RoomLobbyView extends ConsumerWidget {
       );
     });
 
+    // Listen for room status changes and navigate to game when started
+    ref.listen(roomStreamProvider(roomId), (previous, next) {
+      next.whenOrNull(
+        data: (room) {
+          if (room.status == RoomStatus.inProgress && room.currentGameId != null) {
+            // Navigate all players to the game screen when game starts, replacing room in stack
+            context.go('/game/${room.currentGameId}');
+          }
+        },
+      );
+    });
+
     return roomAsync.when(
-      data: (room) => _buildLobby(context, ref, room, lobbyState),
+      data: (room) {
+        // If room has active game, go to game directly
+        if (room.status == RoomStatus.inProgress && room.currentGameId != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              context.go('/game/${room.currentGameId}');
+            }
+          });
+          return Scaffold(
+            appBar: const CalderumAppBar(title: '🎮 Game Active'),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+        return _buildLobby(context, ref, room, lobbyState);
+      },
       loading: () => Scaffold(
         appBar: const CalderumAppBar(title: '🏠 Room'),
         body: const Center(child: CircularProgressIndicator()),

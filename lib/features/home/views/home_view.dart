@@ -23,7 +23,7 @@ class HomeView extends ConsumerStatefulWidget {
 
 class _HomeViewState extends ConsumerState<HomeView> {
   final _roomCodeController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final _joinRoomFormKey = GlobalKey<FormState>();
   bool _isJoining = false;
 
   @override
@@ -55,6 +55,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
     // Use the AuthViewModel which has stable auth state management
     final authState = ref.watch(authViewModelProvider);
 
+    // Check if we're still in initial loading phase
+    final isInitialLoading = authState.maybeWhen(
+      loading: () => true,
+      orElse: () => false,
+    );
+
     // Extract user ID from auth state
     final currentUserId = authState.when(
       initial: () => null,
@@ -65,10 +71,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
       unauthenticated: () => null,
     );
 
-    // Only watch the stream if we have a stable user ID
-    final userRoomsAsync = currentUserId != null
-        ? ref.watch(userRoomsStreamProvider(currentUserId))
-        : const AsyncValue<List<RoomModel>>.data([]);
+    // Handle rooms stream based on auth state
+    final AsyncValue<List<RoomModel>> userRoomsAsync;
+    if (isInitialLoading) {
+      // Always show loading state while auth is loading
+      userRoomsAsync = const AsyncValue.loading();
+    } else if (currentUserId != null) {
+      userRoomsAsync = ref.watch(userRoomsStreamProvider(currentUserId));
+    } else {
+      // Only show empty data when auth is actually unauthenticated
+      userRoomsAsync = const AsyncValue.data([]);
+    }
 
     // Listen for successful room creation
     ref.listen(createRoomViewModelProvider, (previous, next) {
@@ -76,7 +89,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         data: (room) {
           if (room != null) {
             // Navigate to the created room immediately
-            context.go('/room/${room.id}');
+            context.push('/room/${room.id}');
           }
         },
         loading: () {},
@@ -99,7 +112,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person, color: Colors.white),
-            onPressed: () => context.push(RoutePaths.profile),
+            onPressed: () => context.push('/profile'),
           ),
         ],
       ),
@@ -118,6 +131,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 // Build UI based on room data
                 Builder(
                   builder: (context) {
+                    // Show loading state if auth is loading OR if rooms haven't been checked yet
+                    if (isInitialLoading || 
+                        (currentUserId != null && userRoomsAsync.isLoading)) {
+                      // Show loading skeleton
+                      return _buildLoadingSkeleton(createRoomState);
+                    }
+                    
                     return userRoomsAsync.when(
                       data: (rooms) {
                         final activeRooms = rooms
@@ -218,188 +238,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             const SizedBox(height: 24),
 
                             // Join Room Section
-                            Form(
-                              key: _formKey,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: CalderumTextField(
-                                      controller: _roomCodeController,
-                                      label: 'Room Code',
-                                      hint: 'Enter 6-digit room code',
-                                      prefixIcon: Icons.vpn_key,
-                                      textCapitalization:
-                                          TextCapitalization.characters,
-                                      inputFormatters: [
-                                        LengthLimitingTextInputFormatter(6),
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'[A-Za-z0-9]'),
-                                        ),
-                                        TextInputFormatter.withFunction((
-                                          oldValue,
-                                          newValue,
-                                        ) {
-                                          return newValue.copyWith(
-                                            text: newValue.text.toUpperCase(),
-                                          );
-                                        }),
-                                      ],
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter a room code';
-                                        }
-                                        if (value.length != 6) {
-                                          return 'Room code must be 6 characters';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  SizedBox(
-                                    width: 56,
-                                    height: 56,
-                                    child: ValueListenableBuilder<TextEditingValue>(
-                                      valueListenable: _roomCodeController,
-                                      builder: (context, value, _) {
-                                        final isEmpty = value.text.isEmpty;
-                                        return AnimatedContainer(
-                                          duration: const Duration(
-                                            milliseconds: 300,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isEmpty
-                                                ? AppTheme.secondaryColor
-                                                      .withValues(alpha: 0.8)
-                                                : AppTheme.primaryColor,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color:
-                                                    (isEmpty
-                                                            ? AppTheme
-                                                                  .secondaryColor
-                                                            : AppTheme
-                                                                  .primaryColor)
-                                                        .withValues(alpha: 0.3),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Material(
-                                            color: Colors.transparent,
-                                            child: Tooltip(
-                                              message: isEmpty
-                                                  ? 'Paste room code'
-                                                  : 'Join room',
-                                              child: InkWell(
-                                                onTap: isEmpty
-                                                    ? _pasteFromClipboard
-                                                    : (_isJoining
-                                                          ? null
-                                                          : _joinRoom),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                child: SizedBox(
-                                                  width: 56,
-                                                  height: 56,
-                                                  child: Center(
-                                                    child: _isJoining
-                                                        ? const SizedBox(
-                                                            width: 20,
-                                                            height: 20,
-                                                            child: CircularProgressIndicator(
-                                                              strokeWidth: 2,
-                                                              valueColor:
-                                                                  AlwaysStoppedAnimation<
-                                                                    Color
-                                                                  >(
-                                                                    Colors
-                                                                        .white,
-                                                                  ),
-                                                            ),
-                                                          )
-                                                        : Icon(
-                                                            isEmpty
-                                                                ? Icons.paste
-                                                                : Icons
-                                                                      .arrow_forward,
-                                                            color: Colors.white,
-                                                            size: 24,
-                                                          ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            _buildJoinRoomSection(),
                           ],
                         );
                       },
-                      loading: () {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Loading skeleton for rooms section
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width: 120,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                                Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-
-                            // Loading skeleton room cards
-                            ...List.generate(
-                              2,
-                              (index) => _buildLoadingRoomCard(),
-                            ),
-
-                            const SizedBox(height: 24),
-                            Container(
-                              height: 1,
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Create room card (still functional during loading)
-                            createRoomState.when(
-                              data: (_) =>
-                                  CreateRoomCard(onPressed: _createRoom),
-                              loading: () => const CreateRoomCard(
-                                onPressed: null,
-                                isLoading: true,
-                              ),
-                              error: (_, _) =>
-                                  CreateRoomCard(onPressed: _createRoom),
-                            ),
-                          ],
-                        );
-                      },
+                      loading: () => _buildLoadingSkeleton(createRoomState),
                       error: (error, _) {
                         return const SizedBox.shrink();
                       },
@@ -420,7 +263,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Future<void> _joinRoom() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_joinRoomFormKey.currentState!.validate()) return;
 
     setState(() => _isJoining = true);
 
@@ -442,7 +285,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
       if (mounted) {
         // Navigate to the joined room
-        context.go('/room/${room.id}');
+        context.push('/room/${room.id}');
       }
     } catch (error) {
       if (mounted) {
@@ -674,6 +517,174 @@ class _HomeViewState extends ConsumerState<HomeView> {
     }
   }
 
+  Widget _buildLoadingSkeleton(AsyncValue<RoomModel?> createRoomState) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Loading skeleton for rooms section
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 120,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Loading skeleton room cards
+        ...List.generate(
+          2,
+          (index) => _buildLoadingRoomCard(),
+        ),
+
+        const SizedBox(height: 24),
+        Container(
+          height: 1,
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+        const SizedBox(height: 24),
+
+        // Create room card (still functional during loading)
+        createRoomState.when(
+          data: (_) => CreateRoomCard(onPressed: _createRoom),
+          loading: () => const CreateRoomCard(
+            onPressed: null,
+            isLoading: true,
+          ),
+          error: (_, __) => CreateRoomCard(onPressed: _createRoom),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Join Room Section (also shown during loading)
+        _buildJoinRoomSection(),
+      ],
+    );
+  }
+
+  Widget _buildJoinRoomSection() {
+    return Form(
+      key: _joinRoomFormKey,
+      child: Row(
+        children: [
+          Expanded(
+            child: CalderumTextField(
+              controller: _roomCodeController,
+              label: 'Room Code',
+              hint: 'Enter 6-digit room code',
+              prefixIcon: Icons.vpn_key,
+              textCapitalization: TextCapitalization.characters,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(6),
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'[A-Za-z0-9]'),
+                ),
+                TextInputFormatter.withFunction((
+                  oldValue,
+                  newValue,
+                ) {
+                  return newValue.copyWith(
+                    text: newValue.text.toUpperCase(),
+                  );
+                }),
+              ],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a room code';
+                }
+                if (value.length != 6) {
+                  return 'Room code must be 6 characters';
+                }
+                return null;
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 56,
+            height: 56,
+            child: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _roomCodeController,
+              builder: (context, value, _) {
+                final isEmpty = value.text.isEmpty;
+                return AnimatedContainer(
+                  duration: const Duration(
+                    milliseconds: 300,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isEmpty
+                        ? AppTheme.secondaryColor.withValues(alpha: 0.8)
+                        : AppTheme.primaryColor,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isEmpty
+                                ? AppTheme.secondaryColor
+                                : AppTheme.primaryColor)
+                            .withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Tooltip(
+                      message: isEmpty ? 'Paste room code' : 'Join room',
+                      child: InkWell(
+                        onTap: isEmpty
+                            ? _pasteFromClipboard
+                            : (_isJoining ? null : _joinRoom),
+                        borderRadius: BorderRadius.circular(12),
+                        child: SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: Center(
+                            child: _isJoining
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : Icon(
+                                    isEmpty ? Icons.paste : Icons.arrow_forward,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLoadingRoomCard() {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -786,7 +797,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       margin: const EdgeInsets.only(bottom: 12),
       color: AppTheme.surfaceColor.withValues(alpha: 0.8),
       child: InkWell(
-        onTap: () => context.go('/room/${room.id}'),
+        onTap: () => context.push('/room/${room.id}'),
         onLongPress: canDelete ? () => _showDeleteConfirmation(room) : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
