@@ -81,6 +81,27 @@ class AppTheme {
     color: Colors.white,
   );
 
+  static TextStyle get headingStyle => const TextStyle(
+    fontFamily: 'Caudex',
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
+
   static TextStyle get bodyStyle =>
       const TextStyle(fontFamily: 'Caudex', fontSize: 16, color: Colors.white);
+  
+  static Color getPlayerColor(String userId) {
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.red,
+    ];
+    
+    final hash = userId.hashCode.abs();
+    return colors[hash % colors.length];
+  }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../services/sound_service.dart';
+import '../services/haptic_service.dart';
 
 enum CalderumButtonStyle { primary, secondary, danger, outlined }
 
-class CalderumButton extends StatelessWidget {
+class CalderumButton extends ConsumerWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -23,7 +26,17 @@ class CalderumButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final soundService = ref.read(soundServiceProvider);
+    final hapticService = ref.read(hapticServiceProvider);
+    
+    // Enhanced onPressed with feedback
+    final enhancedOnPressed = onPressed == null ? null : () {
+      soundService.playUISound(UISoundType.click);
+      hapticService.gameEvent(GameHapticType.buttonPress);
+      onPressed!();
+    };
+    
     final Widget child = isLoading
         ? const SizedBox(
             width: 20,
@@ -62,7 +75,7 @@ class CalderumButton extends StatelessWidget {
           width: width,
           height: height,
           child: OutlinedButton(
-            onPressed: isLoading ? null : onPressed,
+            onPressed: isLoading ? null : enhancedOnPressed,
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: theme.colorScheme.primary, width: 2),
               shape: RoundedRectangleBorder(
@@ -78,7 +91,7 @@ class CalderumButton extends StatelessWidget {
           width: width,
           height: height,
           child: ElevatedButton(
-            onPressed: isLoading ? null : onPressed,
+            onPressed: isLoading ? null : enhancedOnPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.secondaryContainer,
               foregroundColor: theme.colorScheme.onSecondaryContainer,
@@ -96,7 +109,7 @@ class CalderumButton extends StatelessWidget {
           width: width,
           height: height,
           child: ElevatedButton(
-            onPressed: isLoading ? null : onPressed,
+            onPressed: isLoading ? null : enhancedOnPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.errorContainer,
               foregroundColor: theme.colorScheme.onErrorContainer,
@@ -114,7 +127,7 @@ class CalderumButton extends StatelessWidget {
           width: width,
           height: height,
           child: ElevatedButton(
-            onPressed: isLoading ? null : onPressed,
+            onPressed: isLoading ? null : enhancedOnPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.primary,
               foregroundColor: theme.colorScheme.onPrimary,

@@ -1,0 +1,57 @@
+check points.txt, it shows the points of the game board and we should represent in the pot chips in the game screen, we may need to do some refactor, as there are many pot numbers that repeat 
+themself and we dont have rubyes into account\
+the text represents points as:
+pot_number:points r for ruby
+1:0
+2:0
+3:0
+4:0
+5:0 r
+6:1
+7:1
+8:1
+9:1 r
+10:2
+11:2
+12:2
+13:2 r
+14:3
+15:3
+15:3 r
+16:3
+16:4
+17:4
+17:4 r
+18:4
+18:5
+19:5
+19:5 r
+20:5
+20:6
+21:6
+21:6 r
+22:7
+22:7 r
+13:7
+13:8
+24:8
+24:8 r
+25:9
+25:9 r
+26:9
+26:10
+27:10
+27:10 r
+28:11
+28:11 r
+29:11
+29:12
+30:12
+30:12 r
+31:12
+31:13
+32:13
+32:13 r
+33:14
+33:14 r
+35:15

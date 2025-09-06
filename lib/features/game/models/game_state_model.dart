@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'ingredient_model.dart';
 import '../../account/models/user_model.dart';
+import '../utils/pot_scoring.dart';
 
 part 'game_state_model.freezed.dart';
 part 'game_state_model.g.dart';
@@ -49,7 +50,7 @@ class PotState with _$PotState {
   const factory PotState({
     required String playerId,
     @Default([]) List<IngredientChip> placedChips, // Chips on pot in order
-    @Default(0) int dropletPosition, // Current droplet position (0-33)
+    @Default(0) int dropletPosition, // Current droplet position (0-53)
     int? ratPosition, // Rat stone position (catch-up mechanic)
     @Default(false) bool hasExploded, // If pot exploded this turn
     @Default(true) bool flaskAvailable, // Can use flask to return white chip
@@ -86,21 +87,14 @@ extension PotStateOperations on PotState {
   bool get isExploded => whiteChipTotal > 7;
 
   /// Get coins based on scoring position
-  int get coinsFromPosition => scoringPosition;
+  int get coinsFromPosition => PotScoring.getCoins(
+      PotScoring.getPotNumber(scoringPosition), hasExploded);
 
-  /// Check if player is on a ruby space (every 5th space)
-  bool get isOnRubySpace => scoringPosition % 5 == 0 && scoringPosition > 0;
+  /// Check if player is on a ruby space
+  bool get isOnRubySpace => PotScoring.hasRuby(scoringPosition);
 
   /// Get victory points from scoring track position
-  int get victoryPointsFromPosition {
-    if (scoringPosition <= 10) return 0;
-    if (scoringPosition <= 15) return 1;
-    if (scoringPosition <= 20) return 3;
-    if (scoringPosition <= 25) return 6;
-    if (scoringPosition <= 30) return 10;
-    if (scoringPosition <= 33) return 15;
-    return 15;
-  }
+  int get victoryPointsFromPosition => PotScoring.getVictoryPoints(scoringPosition);
 
   /// Get next available position for placing chip
   int getNextPosition(int chipValue) {
@@ -116,8 +110,8 @@ extension PotStateOperations on PotState {
     return startPosition + chipValue;
   }
 
-  /// Check if position is valid for chip placement (0-33)
-  bool isValidPosition(int position) => position >= 0 && position <= 33;
+  /// Check if position is valid for chip placement (0-53)
+  bool isValidPosition(int position) => position >= 0 && position <= PotScoring.getMaxPosition();
 }
 
 /// Game state for the entire match

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../models/game_state_model.dart';
 import '../models/ingredient_model.dart';
+import '../utils/pot_scoring.dart';
 
 class PotWidget extends StatelessWidget {
   final PotState potState;
@@ -68,8 +69,8 @@ class PotWidget extends StatelessWidget {
           Expanded(
             child: Text(
               potState.hasExploded
-                  ? 'EXPLODED!'
-                  : 'Position: ${potState.scoringPosition}',
+                  ? 'EXPLODED! (Space ${potState.scoringPosition})'
+                  : 'Space: ${potState.scoringPosition} | Pot: ${PotScoring.getPotNumber(potState.scoringPosition)}',
               style: TextStyle(
                 color: potState.hasExploded ? Colors.red : Colors.white,
                 fontWeight: FontWeight.bold,
@@ -78,10 +79,10 @@ class PotWidget extends StatelessWidget {
             ),
           ),
 
-          // Victory Points
+          // Victory Points (based on actual position)
           _buildScoreChip(
             Icons.star,
-            '${potState.victoryPoints} VP',
+            '${PotScoring.getVictoryPoints(potState.scoringPosition)} VP',
             Colors.yellow,
           ),
 
@@ -92,10 +93,10 @@ class PotWidget extends StatelessWidget {
 
           const SizedBox(width: 8),
 
-          // Coins
+          // Coins (based on pot number)
           _buildScoreChip(
             Icons.monetization_on,
-            '${potState.coins}',
+            '${PotScoring.getCoins(PotScoring.getPotNumber(potState.scoringPosition), potState.hasExploded)}',
             Colors.amber,
           ),
 
@@ -151,17 +152,16 @@ class PotWidget extends StatelessWidget {
   }
 
   Widget _buildSpiralTrack(BoxConstraints constraints) {
-    const int totalSpaces = 34; // 0-33
+    const int totalSpaces = 54; // 0-53 based on points.txt
     final List<Widget> spaceWidgets = [];
 
     for (int i = 0; i < totalSpaces; i++) {
       spaceWidgets.add(_buildPotSpace(i, constraints));
     }
 
-    // For now, use a simple grid layout
-    // TODO: Implement proper spiral layout
+    // Grid layout with 7 columns for better display of 54 spaces
     return GridView.count(
-      crossAxisCount: 6,
+      crossAxisCount: 7,
       mainAxisSpacing: 4,
       crossAxisSpacing: 4,
       children: spaceWidgets,
@@ -171,7 +171,8 @@ class PotWidget extends StatelessWidget {
   Widget _buildPotSpace(int position, BoxConstraints constraints) {
     final bool isDropletPosition = position == potState.dropletPosition;
     final bool isRatPosition = position == potState.ratPosition;
-    final bool isRubySpace = position % 5 == 0 && position > 0;
+    final bool isRubySpace = PotScoring.hasRuby(position);
+    final PotScoringData? scoringData = PotScoring.getScoringData(position);
 
     // Find chip at this position
     final IngredientChip? chipAtPosition = potState.placedChips
@@ -204,17 +205,32 @@ class PotWidget extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              // Space number
+              // Pot number and points
               Positioned(
                 top: 2,
                 left: 2,
-                child: Text(
-                  '$position',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (scoringData != null)
+                      Text(
+                        '${scoringData.potNumber}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    if (scoringData != null && scoringData.points > 0)
+                      Text(
+                        '${scoringData.points}p',
+                        style: const TextStyle(
+                          color: Colors.yellow,
+                          fontSize: 9,
+                        ),
+                      ),
+                  ],
                 ),
               ),
 

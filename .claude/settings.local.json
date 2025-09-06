@@ -105,7 +105,8 @@
       "mcp__dart-mcp__run_tests",
       "mcp__dart-mcp__add_roots",
       "mcp__dart-mcp__analyze_files",
-      "WebFetch(domain:stackoverflow.com)"
+      "WebFetch(domain:stackoverflow.com)",
+      "mcp__dart-mcp__pub_dev_search"
     ],
     "deny": [
       "Bash(flutter run:*)"
